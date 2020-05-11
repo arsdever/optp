@@ -5,6 +5,13 @@ namespace optp
 	optp_config::optp_config(std::string const& file_path)
 	{
 		m_content = nlohmann::json::parse(file_path);
+		for (std::string const& node_ip : m_content["cluster"])
+			m_cluster_nodes.push_back(node_ip);
+	}
+
+	optp_config::cluster_def_t const& optp_config::cluster_definition() const 
+	{ 
+		return m_cluster_nodes;
 	}
 
 	optp_config optp_config::parse(std::string const& file_path)

@@ -1,4 +1,5 @@
-json
-sockpp
-spdlog
+build
 .vs
+spdlog
+sockpp
+json

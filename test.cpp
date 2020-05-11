@@ -2,6 +2,6 @@
 
 int main()
 {
-	optp::optp("config.json");
+	optp::optp proto("config.json");
 	return 0;
 }
