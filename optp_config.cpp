@@ -1,10 +1,14 @@
 #include "optp_config.h"
+#include <fstream>
 
 namespace optp
 {
 	optp_config::optp_config(std::string const& file_path)
 	{
-		m_content = nlohmann::json::parse(file_path);
+		std::ifstream istm(file_path);
+		if(!istm)
+			return;
+		m_content = nlohmann::json::parse(istm);
 		for (std::string const& node_ip : m_content["cluster"])
 			m_cluster_nodes.push_back(node_ip);
 	}

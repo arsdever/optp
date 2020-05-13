@@ -6,9 +6,12 @@ add_library(optp SHARED
 	optp_config.cpp)
 
 add_executable(optp_test test.cpp)
-target_link_libraries(optp PUBLIC sockpp json spdlog)
-target_link_libraries(optp_test PUBLIC optp)
+
+find_library(SOCKPP_LIB sockpp PATHS ${CMAKE_SOURCE_DIR}/sockpp/build_linux REQUIRED)
+
 include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/sockpp/include)
+include_directories(${sockpp_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/json/include)
 include_directories(${CMAKE_SOURCE_DIR}/spdlog/include)
+target_link_libraries(optp PUBLIC ${SOCKPP_LIB})
+target_link_libraries(optp_test PUBLIC optp pthread)
