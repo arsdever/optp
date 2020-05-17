@@ -1,5 +1,6 @@
-build
+build*
 .vs
 spdlog
 sockpp
 json
+tags

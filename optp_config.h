@@ -2,9 +2,11 @@
 
 #include <nlohmann/json.hpp>
 
+#include <optp_export.h>
+
 namespace optp
 {
-	class optp_config
+	class OPTP_EXPORT optp_config
 	{
 	public:
 		typedef std::string node_def_t;
