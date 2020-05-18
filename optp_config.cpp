@@ -1,3 +1,12 @@
+/*
+ * =====================================================================================
+ *
+ *		Filename:	optp_config.cpp
+ *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
+ *
+ * =====================================================================================
+ */
+
 #include "optp_config.h"
 #include <fstream>
 

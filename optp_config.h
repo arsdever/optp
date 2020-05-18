@@ -1,3 +1,12 @@
+/*
+ * =====================================================================================
+ *
+ *		Filename:	optp_config.h
+ *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
+ *
+ * =====================================================================================
+ */
+
 #pragma once
 
 #include <nlohmann/json.hpp>
