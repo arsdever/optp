@@ -12,9 +12,11 @@
 #include <interface/operation.h>
 #include <unordered_set>
 
+#include <optp_export.h>
+
 namespace optp
 {
-	class operation : public interfaces::operation
+	class OPTP_EXPORT operation : public interfaces::operation
 	{
 	public:
 		operation();

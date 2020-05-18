@@ -4,3 +4,4 @@ spdlog
 sockpp
 json
 tags
+CMakeSettings.json

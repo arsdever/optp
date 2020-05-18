@@ -5,9 +5,7 @@ project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES CXX)
 
 
 if(WIN32)
-	set(BUILD_FOLDER_SUFFIX "build")
 else()
-	set(BUILD_FOLDER_SUFFIX "build_linux")
 	set(OTHER_LIBS pthread)
 endif()
 
@@ -40,8 +38,8 @@ add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST})
 # 3th party libraries
 
 message(STATUS "Adding third party libraries")
-find_package(sockpp PATHS "${CMAKE_SOURCE_DIR}/sockpp/${BUILD_FOLDER_SUFFIX}" REQUIRED)
-find_package(nlohmann_json PATHS "${CMAKE_SOURCE_DIR}/json/${BUILD_FOLDER_SUFFIX}" REQUIRED)
+find_package(sockpp PATHS "${CMAKE_SOURCE_DIR}/sockpp/build" REQUIRED)
+find_package(nlohmann_json PATHS "${CMAKE_SOURCE_DIR}/json/build" REQUIRED)
 
 if(WIN32)
 	set(SOCKPP_LIBRARY_NAME sockpp-static)
@@ -86,10 +84,9 @@ install(EXPORT
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/interface>
-		$<INSTALL_INTERFACE:interface>
 		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/exports>
+		$<INSTALL_INTERFACE:interface>
 
 )
 
@@ -122,7 +119,7 @@ get_target_property(SOCKPP_INCLUDE_DIR sockpp::${SOCKPP_LIBRARY_NAME} INTERFACE_
 #get_target_property(SOCKPP_LIBRARY_DIR sockpp::sockpp-static IMPORTED_LOCATION_DEBUG)
 #get_target_property(SOCKPP_LIBRARIES sockpp::sockpp-static INTERFACE_LINK_LIBRARIES)
 
-target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_SOURCE_DIR}/interface)
+target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(${PROJECT_NAME}_test PUBLIC ${SOCKPP_INCLUDE_DIR})
 #target_link_directories(${PROJECT_NAME} PUBLIC ${SOCKPP_LIBRARY_DIR})
