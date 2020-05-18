@@ -121,9 +121,12 @@ get_target_property(SOCKPP_INCLUDE_DIR sockpp::${SOCKPP_LIBRARY_NAME} INTERFACE_
 #get_target_property(SOCKPP_LIBRARY_DIR sockpp::sockpp-static IMPORTED_LOCATION_DEBUG)
 #get_target_property(SOCKPP_LIBRARIES sockpp::sockpp-static INTERFACE_LINK_LIBRARIES)
 
-target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_SOURCE_DIR})
-target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_BINARY_DIR})
-target_include_directories(${PROJECT_NAME}_test PUBLIC ${SOCKPP_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME}_test
+	PRIVATE ${CMAKE_SOURCE_DIR}
+		${CMAKE_BINARY_DIR}
+		${CMAKE_SOURCE_DIR}/spdlog/include
+	PUBLIC ${SOCKPP_INCLUDE_DIR}
+)
 #target_link_directories(${PROJECT_NAME} PUBLIC ${SOCKPP_LIBRARY_DIR})
 
 
