@@ -17,6 +17,7 @@
 #include <sockpp/tcp_connector.h>
 #include <thread>
 
+static const int OPTP_DEFAULT_PORT = 33000; // TODO: must be configurable
 static sockpp::socket_initializer sockppInit;
 
 namespace optp
@@ -27,6 +28,7 @@ namespace optp
 		, m_thisNode(node)
 	{
 		startServer();
+		connectToServer();
 	}
 
 	optp::optp(std::string const& config_file_path)
@@ -43,7 +45,7 @@ namespace optp
 
 	bool optp::startServer()
 	{
-		m_serverSocket = std::move(sockpp::tcp_acceptor(33000, 10));
+		m_serverSocket = std::move(sockpp::tcp_acceptor(OPTP_DEFAULT_PORT, 10));
 		if (!m_serverSocket)
 		{
 			// TODO: print error log
@@ -85,6 +87,21 @@ namespace optp
 
 	bool optp::connectToServer()
 	{
+		for (optp_config::node_def_t node : m_configuration.cluster_definition()) {
+			if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node](interfaces::node_shptr const& e) -> bool { return e->address() == node; }) != m_remotes.end())
+			{
+				sockpp::tcp_connector remote_socket({ node, OPTP_DEFAULT_PORT });
+				if (!remote_socket)
+				{
+					// TODO: report connection problem
+					continue;
+				}
+
+				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(remote_socket));
+				std::static_pointer_cast<real_node>(m_thisNode)->registerRemoteNode(rnode);
+			}
+		}
+
 		return true;
 	}
 }
