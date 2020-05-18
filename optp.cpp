@@ -87,7 +87,7 @@ namespace optp
 	bool optp::connectToServer()
 	{
 		for (optp_config::node_def_t node : m_configuration.cluster_definition()) {
-			if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node](interfaces::node_shptr const& e) -> bool { return e->address() == node; }) != m_remotes.end())
+			if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node](interfaces::node_shptr const& e) -> bool { return e->address() == node; }) == m_remotes.end())
 			{
 				sockpp::tcp_connector remote_socket({ node, OPTP_DEFAULT_PORT });
 				if (!remote_socket)
