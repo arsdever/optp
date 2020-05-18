@@ -48,9 +48,10 @@ else()
 endif()
 
 target_link_libraries(${PROJECT_NAME}
-	PRIVATE sockpp::${SOCKPP_LIBRARY_NAME}
-	PRIVATE nlohmann_json::nlohmann_json
-	PRIVATE ${SOCKPP_LIBRARIES}
+	PRIVATE
+		sockpp::${SOCKPP_LIBRARY_NAME}
+		nlohmann_json::nlohmann_json
+		${SOCKPP_LIBRARIES}
 )
 
 include(GenerateExportHeader)
@@ -87,7 +88,8 @@ target_include_directories(${PROJECT_NAME}
 		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/exports>
 		$<INSTALL_INTERFACE:interface>
-
+	PRIVATE
+		${CMAKE_SOURCE_DIR}/spdlog/include
 )
 
 # === Library configuration finished =======================================================

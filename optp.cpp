@@ -12,9 +12,13 @@
 #include "remote_node.h"
 #include "real_node.h"
 
+#include <thread>
+
 #include <sockpp/tcp_acceptor.h>
 #include <sockpp/tcp_connector.h>
-#include <thread>
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 static const int OPTP_DEFAULT_PORT = 33000; // TODO: must be configurable
 static sockpp::socket_initializer sockppInit;
@@ -28,6 +32,9 @@ namespace optp
 	{
 		startServer();
 		connectToServer();
+		spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
+		auto file_logger = spdlog::basic_logger_mt("basic_logger", "logs/basic.txt");
+		spdlog::set_default_logger(file_logger);
 	}
 
 	optp::optp(std::string const& config_file_path)
@@ -58,9 +65,10 @@ namespace optp
 				sockpp::inet_address peer_address;
 				sockpp::tcp_socket peer_socket = server.accept(&peer_address);
 
+				spdlog::info("Peer is connecting with address {0}", peer_address.to_string());
 				if (!peer_socket)
 				{
-					// TODO: print error log
+					spdlog::error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
 					continue;
 				}
 
@@ -69,12 +77,14 @@ namespace optp
 					if (remotes.size() == maxConCount)
 					{
 						// max connection count reached
-						// TODO: print connection drop log
-						peer_socket.write("Maximum connection count reached.");
+						const std::string err_msg = "Maximum connection count reached.";
+						spdlog::error(err_msg);
+						peer_socket.write(err_msg);
 						peer_socket.close();
 					}
 				}
 
+				spdlog::info("Remote node was created for peer {0}", peer_address.to_string());
 				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(peer_socket));
 				std::static_pointer_cast<real_node>(pnode)->registerRemoteNode(rnode);
 				remotes.insert(rnode);
@@ -92,10 +102,11 @@ namespace optp
 				sockpp::tcp_connector remote_socket({ node, OPTP_DEFAULT_PORT });
 				if (!remote_socket)
 				{
-					// TODO: report connection problem
+					spdlog::info("Cannot connect to host server\n\t{0}", remote_socket.last_error_str());
 					continue;
 				}
 
+				spdlog::info("Successfully connected to host {0}", node);
 				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(remote_socket));
 				std::static_pointer_cast<real_node>(m_thisNode)->registerRemoteNode(rnode);
 			}
