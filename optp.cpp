@@ -12,13 +12,16 @@
 #include "remote_node.h"
 #include "real_node.h"
 
-#include <thread>
+#include <thread>	
 
 #include <sockpp/tcp_acceptor.h>
 #include <sockpp/tcp_connector.h>
 
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/ansicolor_sink.h>
+
+static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+static auto logger = std::make_shared<spdlog::logger>("optp", sink);
 
 static const int OPTP_DEFAULT_PORT = 33000; // TODO: must be configurable
 static sockpp::socket_initializer sockppInit;
@@ -30,6 +33,7 @@ namespace optp
 		, m_configuration(optp_config::parse(config_file_path))
 		, m_thisNode(node)
 	{
+		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		startServer();
 		connectToServer();
 	}
@@ -62,10 +66,10 @@ namespace optp
 				sockpp::inet_address peer_address;
 				sockpp::tcp_socket peer_socket = server.accept(&peer_address);
 
-				spdlog::info("Peer is connecting with address {0}", peer_address.to_string());
+				logger->info("Peer is connecting with address {0}", peer_address.to_string());
 				if (!peer_socket)
 				{
-					spdlog::error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
+					logger->error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
 					continue;
 				}
 
@@ -75,13 +79,13 @@ namespace optp
 					{
 						// max connection count reached
 						const std::string err_msg = "Maximum connection count reached.";
-						spdlog::error(err_msg);
+						logger->error(err_msg);
 						peer_socket.write(err_msg);
 						peer_socket.close();
 					}
 				}
 
-				spdlog::info("Remote node was created for peer {0}", peer_address.to_string());
+				logger->info("Remote node was created for peer {0}", peer_address.to_string());
 				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(peer_socket));
 				std::static_pointer_cast<real_node>(pnode)->registerRemoteNode(rnode);
 				remotes.insert(rnode);
@@ -99,11 +103,11 @@ namespace optp
 				sockpp::tcp_connector remote_socket({ node, OPTP_DEFAULT_PORT });
 				if (!remote_socket)
 				{
-					spdlog::info("Cannot connect to host server\n\t{0}", remote_socket.last_error_str());
+					logger->info("Cannot connect to host server\n\t{0}", remote_socket.last_error_str());
 					continue;
 				}
 
-				spdlog::info("Successfully connected to host {0}", node);
+				logger->info("Successfully connected to host {0}", node);
 				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(remote_socket));
 				std::static_pointer_cast<real_node>(m_thisNode)->registerRemoteNode(rnode);
 			}
