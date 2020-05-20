@@ -98,7 +98,9 @@ target_include_directories(${PROJECT_NAME}
 set(PROJET_TEST_NAME ${PROJECT_NAME}_test)
 message(STATUS "Configuring the test executable")
 list(APPEND TEST_CLASS_FILES
-	fake_node)
+	fake_node
+	interpreter
+)
 
 
 message(VERBOSE "Test classes")
