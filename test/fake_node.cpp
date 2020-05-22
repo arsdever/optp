@@ -11,12 +11,12 @@ namespace optp
 			return "fake_address";
 		}
 
-		interfaces::operation& fake_node::execute(interfaces::operation& operation)
+		interfaces::operation_ref fake_node::execute(interfaces::operation_ref operation)
 		{
 			return operation;
 		}
 
-		interfaces::operation& fake_node::handle(interfaces::operation& operation)
+		interfaces::operation_ref fake_node::handle(interfaces::operation_ref operation)
 		{
 			return operation;
 		}

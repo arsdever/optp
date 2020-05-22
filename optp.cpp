@@ -47,12 +47,19 @@ namespace optp
 
 	void optp::executeOperation(interfaces::operation_ref operation)
 	{
-		m_thisNode->execute(operation);
+		// Temporary disabling operation execution on current node
+		// TODO: There is a bug related to double executin problem. Remove this when doing it
+		// m_thisNode->execute(operation);
+		for (auto remote : m_remotes)
+		{
+			remote->execute(operation);
+		}
 	}
 
 	bool optp::startServer()
 	{
 		m_serverSocket = std::move(sockpp::tcp_acceptor(OPTP_DEFAULT_PORT, 10));
+		logger->info("Local server started on {0}", static_cast<sockpp::inet_address>(m_serverSocket.address()).to_string());
 		if (!m_serverSocket)
 		{
 			// TODO: print error log
@@ -110,6 +117,7 @@ namespace optp
 				logger->info("Successfully connected to host {0}", node);
 				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(remote_socket));
 				std::static_pointer_cast<real_node>(m_thisNode)->registerRemoteNode(rnode);
+				m_remotes.insert(rnode);
 			}
 		}
 

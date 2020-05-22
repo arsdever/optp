@@ -31,7 +31,7 @@ namespace optp
 				{
 					i.doOneCommand();
 				}
-			}, *this).detach();
+			}, std::ref(*this)).detach();
 		}
 
 		void interpreter::doOneCommand()

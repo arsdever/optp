@@ -9,6 +9,7 @@
 
 #include <optp.h>
 #include <operation.h>
+#include <uuid_provider.h>
 
 #include "fake_node.h"
 #include "interpreter.h"
@@ -16,8 +17,16 @@
 #include <spdlog/spdlog.h>
 #include <thread>
 
-struct simpleOpeartion : public optp::operation
+class simple_operation : public optp::interfaces::operation
 {
+public:
+	inline simple_operation() : m_uuid(std::move(optp::uuid_provider().provideRandomString())) {}
+	inline void deserialize(std::string const& dataBuffer) override { m_uuid = dataBuffer; }
+	inline std::string serialize() const override { return uuid(); }
+	inline std::string uuid() const override { return m_uuid; }
+
+private:
+	std::string m_uuid;
 };
 
 int main(int argc, char** argv)
@@ -30,7 +39,7 @@ int main(int argc, char** argv)
 	volatile bool finished = false;
 
 	interpreter.registerCallback("send", [=]() {
-		simpleOpeartion operation;
+		simple_operation operation;
 		protocol1->executeOperation(operation);
 	});
 

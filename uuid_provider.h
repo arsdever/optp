@@ -9,11 +9,12 @@
 
 #pragma once
 
+#include <optp_export.h>
 #include <string>
 
 namespace optp
 {
-	class uuid_provider
+	class OPTP_EXPORT uuid_provider
 	{
 		struct srander
 		{

@@ -20,8 +20,8 @@ namespace optp
 
 		// interfaces::node started
 		std::string address() const override; // TODO: Should be changed to address type
-		interfaces::operation& execute(interfaces::operation& operation) override;
-		interfaces::operation& handle(interfaces::operation& operation) override;
+		interfaces::operation_ref execute(interfaces::operation_ref operation) override;
+		interfaces::operation_ref handle(interfaces::operation_ref operation) override;
 		std::string uuid() const override;
 		// interfaces::node finished
 
