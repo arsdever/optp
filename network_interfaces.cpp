@@ -55,7 +55,7 @@ static void collectLocalIpAddresses(std::vector<std::shared_ptr<sockpp::sock_add
 	{
 		if (IF_TYPE_SOFTWARE_LOOPBACK == adapter->IfType)
 			continue;
-		
+
 		for (PIP_ADAPTER_UNICAST_ADDRESS address = adapter->FirstUnicastAddress; NULL != address; address = address->Next)
 		{
 			auto family = address->Address.lpSockaddr->sa_family;
@@ -101,7 +101,28 @@ namespace optp
 {
 	network_interfaces::network_interfaces()
 	{
-		static std::vector<std::shared_ptr<sockpp::sock_address>> vec;
-		collectLocalIpAddresses(vec);
+		collectLocalIpAddresses(m_local_interfaces);
+	}
+
+	bool network_interfaces::is_local(sockpp::sock_address const& address) const
+	{
+		std::string addr_str = address.to_string().substr();
+		std::string ip_str = addr_str.substr(0, addr_str.find_first_of(':'));
+		return is_local(ip_str);
+	}
+
+	bool network_interfaces::is_local(std:: string const& address) const
+	{
+		return std::find_if(m_local_interfaces.begin(), m_local_interfaces.end(), [&address](auto addr) -> bool {
+			std::string addr_str = addr->to_string();
+			std::string ip_str = addr_str.substr(0, addr_str.find_first_of(':'));
+			return address == ip_str;
+			}) != m_local_interfaces.end();
+	}
+
+	network_interfaces& network_interfaces::global()
+	{
+		static network_interfaces instance;
+		return instance;
 	}
 }

@@ -8,15 +8,27 @@
  */
 
 #include "optp_config.h"
+
 #include <fstream>
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/ansicolor_sink.h>
+
+static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+static auto logger = std::make_shared<spdlog::logger>("optp_config", sink);
 
 namespace optp
 {
 	optp_config::optp_config(std::string const& file_path)
 	{
+		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		std::ifstream istm(file_path);
-		if(!istm)
+		if (!istm)
+		{
+			logger->error("Could not open file {0}: {1}", file_path, strerror(errno));
 			return;
+		}
+
 		m_content = nlohmann::json::parse(istm);
 		for (std::string const& node_ip : m_content["cluster"])
 			m_cluster_nodes.push_back(node_ip);

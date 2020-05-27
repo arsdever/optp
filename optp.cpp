@@ -11,6 +11,7 @@
 
 #include "remote_node.h"
 #include "real_node.h"
+#include "network_interfaces.h"
 
 #include <thread>	
 
@@ -47,9 +48,7 @@ namespace optp
 
 	void optp::executeOperation(interfaces::operation_ref operation)
 	{
-		// Temporary disabling operation execution on current node
-		// TODO: There is a bug related to double executin problem. Remove this when doing it
-		// m_thisNode->execute(operation);
+		m_thisNode->execute(operation);
 		for (auto remote : m_remotes)
 		{
 			remote->execute(operation);
@@ -105,6 +104,11 @@ namespace optp
 	bool optp::connectToServer()
 	{
 		for (optp_config::node_def_t node : m_configuration.cluster_definition()) {
+			if (network_interfaces::global().is_local(node))
+			{
+				logger->info("Skipping the local node");
+			}
+
 			if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node](interfaces::node_shptr const& e) -> bool { return e->address() == node; }) == m_remotes.end())
 			{
 				sockpp::tcp_connector remote_socket({ node, OPTP_DEFAULT_PORT });
