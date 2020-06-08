@@ -1,7 +1,5 @@
 build*
 .vs
-spdlog
-sockpp
-json
+.vscode
 tags
 CMakeSettings.json
