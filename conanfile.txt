@@ -1,0 +1,10 @@
+[requires]
+    sockpp/0.7@arsdever/stable
+    nlohmann_json/3.7.3@arsdever/stable
+    spdlog/1.6.1@arsdever/stable
+
+[options]
+    nlohmann_json:testing=False
+
+[generators]
+    cmake

@@ -1,0 +1,14 @@
+{
+ "options": [
+  [
+   "nlohmann_json:testing",
+   "False"
+  ]
+ ],
+ "root": {
+  "name": null,
+  "version": null,
+  "user": null,
+  "channel": null
+ }
+}
