@@ -11,7 +11,7 @@ class Sockpp(ConanFile):
     scm = {
         "type": "git",
         "url": "https://github.com/arsdever/sockpp.git",
-        "revision": "master"
+        "revision": "develop"
     }
 
     def build(self):

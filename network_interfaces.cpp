@@ -92,7 +92,7 @@ static void collectLocalIpAddresses(std::vector<std::shared_ptr<sockpp::sock_add
 			address_list.push_back(std::make_shared<sockpp::inet_address>(*ifa->ifa_addr));
 
 		else if (ifa->ifa_addr->sa_family == AF_INET6)
-			address_list.push_back(std::make_shared<sockpp::inet6_address>(*ifa->ifa_addr));
+			address_list.push_back(std::make_shared<sockpp::inet6_address>(*(sockaddr_in6*)ifa->ifa_addr));
 	}
 #endif
 }
