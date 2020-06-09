@@ -103,7 +103,7 @@ namespace optp
 			if (network_interfaces::global().is_local(node))
 			{
 				logger->info("Skipping the local node");
-				return false;
+				continue;
 			}
 
 			if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node](interfaces::node_shptr const& e) -> bool { return e->address() == node; }) == m_remotes.end())
