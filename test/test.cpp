@@ -40,7 +40,8 @@ int main(int argc, char** argv)
 
 	interpreter.registerCallback("send", [=]() {
 		simple_operation operation;
-		protocol1->executeOperation(operation);
+		if(const optp::interfaces::node_shptr node = protocol1->thisNode().lock())
+			node->execute(operation);
 	});
 
 	auto finisher = [&finished]() { finished = true; };

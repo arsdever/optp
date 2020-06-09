@@ -29,7 +29,7 @@ namespace optp
 		optp(std::string const& config_file_path);
 		~optp();
 
-		void executeOperation(interfaces::operation_ref operation);
+		interfaces::node_wptr thisNode() const;
 
 	private:
 		bool startServer();

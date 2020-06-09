@@ -46,13 +46,9 @@ namespace optp
 	optp::~optp()
 	{}
 
-	void optp::executeOperation(interfaces::operation_ref operation)
+	interfaces::node_wptr optp::thisNode() const
 	{
-		m_thisNode->execute(operation);
-		for (auto remote : m_remotes)
-		{
-			remote->execute(operation);
-		}
+		return m_thisNode;
 	}
 
 	bool optp::startServer()
