@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <interface/node.h>
+#include <optp/node.h>
 #include <sockpp/tcp_socket.h>
 
 namespace optp

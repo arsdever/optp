@@ -1,14 +1,14 @@
 /*
  * =====================================================================================
  *
- *		Filename:	interface/node.h
+ *		Filename:	optp/node.h
  *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
  *
  * =====================================================================================
  */
 
 #pragma once
-#include <interface/typedefs.h>
+#include <optp/typedefs.h>
 #include <string>
 
 namespace optp
