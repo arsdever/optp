@@ -7,7 +7,7 @@
  * =====================================================================================
  */
 
-#include <interface/object.h>
+#include <optp/object.h>
 
 namespace optp
 {

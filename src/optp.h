@@ -10,13 +10,13 @@
 #pragma once
 #include <optp_lib.h>
 #include <optp_config.h>
-#include <interface/typedefs.h>
+#include <optp/typedefs.h>
 
 #include <string>
 #include <memory>
 #include <unordered_set>
 #include <sockpp/acceptor.h>
-#include <interface/node.h>
+#include <optp/node.h>
 
 #include <optp_export.h>
 

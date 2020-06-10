@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *		Filename:	interface/serializable.h
+ *		Filename:	optp/opeartion.h
  *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
  *
  * =====================================================================================
@@ -9,17 +9,22 @@
 
 #pragma once
 
-#include <interface/typedefs.h>
+#include <optp/typedefs.h>
+#include <optp/serializable.h>
+#include <optp/deserializable.h>
 #include <string>
 
 namespace optp
 {
+	class uuid;
+
 	namespace interfaces
 	{
-		class serializable
+		class operation : public serializable, public deserializable
 		{
 		public:
-			virtual std::string serialize() const = 0;
+			virtual ~operation() = default;
+			virtual std::string uuid() const = 0;
 		};
 	}
 }
