@@ -31,4 +31,9 @@ namespace optp
 	{
 		return;
 	}
+
+	void operation::setResult(interfaces::operation_result_shptr result)
+	{
+		m_nodeSpecResult[result->nodeUuid()] = result;
+	}
 }

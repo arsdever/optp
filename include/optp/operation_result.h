@@ -16,16 +16,14 @@
 
 namespace optp
 {
-	class uuid;
-
 	namespace interfaces
 	{
-		class operation : public serializable, public deserializable
+		class operation_result : public serializable, public deserializable
 		{
 		public:
-			virtual ~operation() = default;
+			virtual ~operation_result() = default;
+			virtual std::string nodeUuid() const = 0;
 			virtual std::string uuid() const = 0;
-			virtual void setResult(operation_result_shptr result) = 0;
 		};
 	}
 }

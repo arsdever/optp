@@ -10,7 +10,7 @@
 #pragma once
 
 #include <optp/operation.h>
-#include <unordered_set>
+#include <unordered_map>
 
 #include <optp_export.h>
 
@@ -23,9 +23,10 @@ namespace optp
 		std::string uuid() const override;
 		std::string serialize() const override;
 		void deserialize(std::string const& data) override;
+		void setResult(interfaces::operation_result_shptr result) override;
 
 	private:
 		std::string m_uuid;
-		std::unordered_set<interfaces::operation_shptr> m_nodeSpecOperation;
+		std::unordered_map<std::string, interfaces::operation_result_shptr> m_nodeSpecResult;
 	};
 }

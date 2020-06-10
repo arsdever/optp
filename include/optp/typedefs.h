@@ -16,6 +16,7 @@ namespace optp
 	{
 		class node;
 		class operation;
+		class operation_result;
 
 		typedef std::shared_ptr<node> node_shptr;
 		typedef std::weak_ptr<node> node_wptr;
@@ -26,5 +27,10 @@ namespace optp
 		typedef std::weak_ptr<operation> operation_wptr;
 		typedef operation& operation_ref;
 		typedef operation const& operation_cref;
+
+		typedef std::shared_ptr<operation_result> operation_result_shptr;
+		typedef std::weak_ptr<operation_result> operation_result_wptr;
+		typedef operation_result& operation_result_ref;
+		typedef operation_result const& operation_result_cref;
 	}
 }
