@@ -3,3 +3,4 @@ build*
 .vscode
 tags
 CMakeSettings.json
+example/test_config.json
