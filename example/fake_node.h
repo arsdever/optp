@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *		Filename:	test/fake_node.cpp
+ *		Filename:	example/fake_node.h
  *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
  *
  * =====================================================================================

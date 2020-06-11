@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *		Filename:	test/test.cpp
+ *		Filename:	example/example.cpp
  *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
  *
  * =====================================================================================

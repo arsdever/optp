@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *		Filename:	test/interpreter.h
+ *		Filename:	example/interpreter.h
  *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
  *
  * =====================================================================================

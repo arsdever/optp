@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *		Filename:	test/interpreter.cpp
+ *		Filename:	example/interpreter.cpp
  *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
  *
  * =====================================================================================

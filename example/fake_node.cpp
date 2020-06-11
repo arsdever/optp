@@ -1,3 +1,11 @@
+/*
+ * =====================================================================================
+ *
+ *		Filename:	example/fake_node.cpp
+ *		Author:		Arsen Gharagyozyan (arsdever), arsen.gharagyozyn.96@gmail.com
+ *
+ * =====================================================================================
+ */
 #pragma once
 
 #include "fake_node.h"
