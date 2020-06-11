@@ -9,6 +9,7 @@
 
 #include "real_node.h"
 #include "uuid_provider.h"
+#include <optp/operation.h>
 
 namespace optp
 {
@@ -23,7 +24,7 @@ namespace optp
 		return m_ipAddress;
 	}
 	
-	interfaces::operation_ref real_node::execute(interfaces::operation_ref operation)
+	interfaces::operation_shptr real_node::execute(interfaces::operation_shptr operation)
 	{
 		for(interfaces::node_wptr wnode : m_remoteNodes)
 		{
@@ -34,7 +35,7 @@ namespace optp
 		return handle(operation);
 	}
 
-	interfaces::operation_ref real_node::handle(interfaces::operation_ref operation)
+	interfaces::operation_shptr real_node::handle(interfaces::operation_shptr operation)
 	{
 		return operation;
 	}

@@ -17,15 +17,12 @@ namespace optp
 	class real_node : public interfaces::node
 	{
 	public:
-		typedef void (*execution_finished_cb) (interfaces::operation_ref);
-
-	public:
 		real_node();
 
 		// interfaces::node started
 		std::string address() const override;
-		interfaces::operation_ref execute(interfaces::operation_ref operation) override;
-		interfaces::operation_ref handle(interfaces::operation_ref operation) override;
+		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
+		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
 		std::string uuid() const override;
 		// interfaces::node finished
 

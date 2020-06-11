@@ -22,8 +22,8 @@ namespace optp
 
 			// interfaces::node started
 			virtual std::string address() const = 0; // TODO: Should be changed to address type
-			virtual interfaces::operation& execute(interfaces::operation& operation) = 0;
-			virtual interfaces::operation& handle(interfaces::operation& operation) = 0;
+			virtual interfaces::operation_shptr execute(interfaces::operation_shptr operation) = 0;
+			virtual interfaces::operation_shptr handle(interfaces::operation_shptr operation) = 0;
 			virtual std::string uuid() const = 0;
 			// interfaces::node finished
 		};
