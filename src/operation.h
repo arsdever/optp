@@ -21,6 +21,7 @@ namespace optp
 	public:
 		operation();
 		std::string uuid() const override;
+		int type() const override;
 		std::string serialize() const override;
 		void deserialize(std::string const& data) override;
 		void setResult(interfaces::operation_result_shptr result) override;

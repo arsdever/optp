@@ -24,6 +24,7 @@ namespace optp
 		{
 		public:
 			virtual ~operation() = default;
+			virtual int type() const = 0;
 			virtual std::string uuid() const = 0;
 			virtual void setResult(operation_result_shptr result) = 0;
 		};
