@@ -15,6 +15,7 @@
 
 #include <spdlog/spdlog.h>
 #include <thread>
+#include <fstream>
 
 class simple_operation : public optp::interfaces::operation
 {
@@ -31,18 +32,17 @@ private:
 
 int main(int argc, char** argv)
 {
-	optp::optp* protocol1 = new optp::optp("test_config.json");
-
-	std::string command;
+	std::unique_ptr<optp::optp> protocol;
 
 	optp::test::interpreter interpreter(std::cin);
 	volatile bool finished = false;
 
-	interpreter.registerCallback("send", [=](std::istream&) {
+	interpreter.registerCallback("send", [&protocol](std::istream&) {
 		optp::interfaces::operation_shptr operation = std::make_shared<simple_operation>();
-		if(const optp::interfaces::node_shptr node = protocol1->thisNode().lock())
+		optp::interfaces::node_wptr wnode = protocol->thisNode();
+		if (const optp::interfaces::node_shptr node = wnode.lock())
 			node->execute(operation);
-	});
+		});
 
 	auto finisher = [&finished](std::istream&) { finished = true; };
 
@@ -50,6 +50,17 @@ int main(int argc, char** argv)
 	interpreter.registerCallback("quit", finisher);
 	interpreter.registerCallback("e", finisher);
 	interpreter.registerCallback("q", finisher);
+	interpreter.registerCallback("load", [&protocol](std::istream& stream) {
+		std::string path;
+		stream >> path;
+		std::ifstream config_file(path);
+		if (config_file)
+		{
+			std::string content = std::string(std::istreambuf_iterator<char>(config_file), std::istreambuf_iterator<char>());
+			std::cout << "Using configuration\n|== Config begin ==|\n" << content << "\n|== Config end ==|" << std::endl;
+		}
+		protocol = std::make_unique<optp::optp>(path);
+		});
 
 	interpreter.exec();
 
@@ -57,8 +68,6 @@ int main(int argc, char** argv)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
-
-	delete protocol1;
 
 	return 0;
 }
