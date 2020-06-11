@@ -52,11 +52,6 @@ namespace optp
 	interfaces::operation_shptr remote_node::handle(interfaces::operation_shptr operation)
 	{
 		logger->info("Handling remote operation with uuid {0}", operation->uuid());
-		if (interfaces::optp_shptr protocol = m_protocol.lock())
-		{
-			return protocol->handle(operation);
-		}
-
 		return operation;
 	}
 
