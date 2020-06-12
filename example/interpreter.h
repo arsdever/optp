@@ -19,7 +19,7 @@ namespace optp
 	{
 		class interpreter
 		{
-			typedef std::function<void()> callback_t;
+			typedef std::function<void(std::istream&)> callback_t;
 			typedef std::unordered_map<std::string, callback_t> callback_mapping_t;
 
 		public:

@@ -44,7 +44,7 @@ namespace optp
 
 			callback_mapping_t::iterator it = m_callback_map.find(m_last_command);
 			if (it != m_callback_map.end())
-				it->second();
+				it->second(m_stream);
 		}
 
 		void interpreter::finish()

@@ -38,13 +38,13 @@ int main(int argc, char** argv)
 	optp::test::interpreter interpreter(std::cin);
 	volatile bool finished = false;
 
-	interpreter.registerCallback("send", [=]() {
+	interpreter.registerCallback("send", [=](std::istream&) {
 		simple_operation operation;
 		if(const optp::interfaces::node_shptr node = protocol1->thisNode().lock())
 			node->execute(operation);
 	});
 
-	auto finisher = [&finished]() { finished = true; };
+	auto finisher = [&finished](std::istream&) { finished = true; };
 
 	interpreter.registerCallback("exit", finisher);
 	interpreter.registerCallback("quit", finisher);
