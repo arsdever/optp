@@ -10,6 +10,7 @@
 #include <optp.h>
 #include <operation.h>
 #include <uuid_provider.h>
+#include <network_interfaces.h>
 
 #include "interpreter.h"
 
@@ -60,6 +61,25 @@ int main(int argc, char** argv)
 			std::cout << "Using configuration\n|== Config begin ==|\n" << content << "\n|== Config end ==|" << std::endl;
 		}
 		protocol = std::make_unique<optp::optp>(path);
+		});
+	interpreter.registerCallback("connect", [&protocol](std::istream& stream) {
+		std::string address;
+		stream >> address;
+		protocol->connectToNode(address);
+		});
+	interpreter.registerCallback("disconnect", [&protocol](std::istream& stream) {
+		std::string address;
+		stream >> address;
+		protocol->disconnectFromNode(address);
+		});
+	interpreter.registerCallback("ip", [&protocol](std::istream& stream) {
+		std::cout << "Local ip addresses are" << std::endl;
+		std::vector<std::string> local_ip_addresses = optp::network_interfaces::global().localAddresses();
+		for (std::string addr : local_ip_addresses)
+		{
+			std::cout << '\t' << addr << std::endl;
+		}
+		std::cout << std::endl;
 		});
 
 	interpreter.exec();

@@ -125,4 +125,16 @@ namespace optp
 		static network_interfaces instance;
 		return instance;
 	}
+
+	std::vector<std::string> network_interfaces::localAddresses() const
+	{
+		std::vector<std::string> result;
+		for (auto addr : m_local_interfaces)
+		{
+			std::string addr_str = addr->to_string();
+			result.push_back(addr_str);
+		}
+
+		return result;
+	}
 }
