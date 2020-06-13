@@ -24,6 +24,7 @@ public:
 	inline void deserialize(std::string const& dataBuffer) override { m_uuid = dataBuffer; }
 	inline std::string serialize() const override { return uuid(); }
 	inline std::string uuid() const override { return m_uuid; }
+	inline void setResult(optp::interfaces::operation_result_shptr result) override {}
 
 private:
 	std::string m_uuid;
