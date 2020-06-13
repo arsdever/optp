@@ -18,12 +18,10 @@ namespace optp
 	public:
 		remote_node(sockpp::tcp_socket&& remote_socket);
 
-		// interfaces::node started
 		std::string address() const override; // TODO: Should be changed to address type
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
 		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
 		std::string uuid() const override;
-		// interfaces::node finished
 
 	private:
 		void setupListener();
