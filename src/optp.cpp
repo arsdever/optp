@@ -77,12 +77,14 @@ namespace optp
 
 	void optp::disconnectFromNode(optp_config::node_def_t const& node_def)
 	{
-		auto node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool { return e->address() == node_def; });
+		auto node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool {
+			return e->address().find_first_of(node_def) != std::string::npos;
+			});
 		if (node_it == m_remotes.end())
 		{
 			logger->warn("Node doesn't exist in the connected nodes list");
+			return;
 		}
-
 		m_remotes.erase(node_it);
 	}
 
