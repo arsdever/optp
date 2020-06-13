@@ -40,8 +40,14 @@ namespace optp
 	}
 
 	optp::optp(std::string const& config_file_path)
-		: optp(config_file_path, std::move(std::make_shared<real_node>()))
-	{}
+		: cm_maxConnectionCount(0)
+		, m_configuration(optp_config::parse(config_file_path))
+		, m_thisNode(std::move(std::make_shared<real_node>(weak_from_this())))
+	{
+		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
+		startServer();
+		connectToServer();
+	}
 
 	optp::~optp()
 	{}
@@ -49,6 +55,22 @@ namespace optp
 	interfaces::node_wptr optp::thisNode() const
 	{
 		return m_thisNode;
+	}
+
+	interfaces::operation_shptr optp::execute(interfaces::operation_shptr operation)
+	{
+		// TODO: Make this to work in parallel for all nodes
+		m_thisNode->handle(operation);
+		for (interfaces::node_shptr remote : m_remotes)
+		{
+			remote->execute(operation);
+		}
+		return operation;
+	}
+
+	interfaces::operation_shptr optp::handle(interfaces::operation_shptr operation)
+	{
+		return m_thisNode->handle(operation);
 	}
 
 	void optp::connectToNode(optp_config::node_def_t const& node_def)
@@ -69,8 +91,7 @@ namespace optp
 			}
 
 			logger->info("Successfully connected to host {0}", node_def);
-			interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(remote_socket));
-			std::static_pointer_cast<real_node>(m_thisNode)->registerRemoteNode(rnode);
+			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(remote_socket));
 			m_remotes.insert(rnode);
 		}
 	}
@@ -125,8 +146,7 @@ namespace optp
 				}
 
 				logger->info("Remote node was created for peer {0}", peer_address.to_string());
-				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(peer_socket));
-				std::static_pointer_cast<real_node>(pnode)->registerRemoteNode(rnode);
+				interfaces::node_shptr rnode = std::make_shared<remote_node>(optp.weak_from_this(), std::move(peer_socket));
 				remotes.insert(rnode);
 			}
 		}).detach();

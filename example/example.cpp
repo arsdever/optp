@@ -41,8 +41,7 @@ int main(int argc, char** argv)
 	interpreter.registerCallback("send", [&protocol](std::istream&) {
 		optp::interfaces::operation_shptr operation = std::make_shared<simple_operation>();
 		optp::interfaces::node_wptr wnode = protocol->thisNode();
-		if (const optp::interfaces::node_shptr node = wnode.lock())
-			node->execute(operation);
+			protocol->execute(operation);
 		});
 
 	auto finisher = [&finished](std::istream&) { finished = true; };

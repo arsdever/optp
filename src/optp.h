@@ -22,7 +22,7 @@
 
 namespace optp
 {
-	class OPTP_EXPORT optp
+	class OPTP_EXPORT optp : public std::enable_shared_from_this<optp>
 	{
 	public:
 		optp(std::string const& config_file_path, interfaces::node_shptr node);
@@ -30,6 +30,9 @@ namespace optp
 		~optp();
 
 		interfaces::node_wptr thisNode() const;
+
+		interfaces::operation_shptr execute(interfaces::operation_shptr operation);
+		interfaces::operation_shptr handle(interfaces::operation_shptr operation);
 
 		void connectToNode(optp_config::node_def_t const& node_def);
 		void disconnectFromNode(optp_config::node_def_t const& node_def);

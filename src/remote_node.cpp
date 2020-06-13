@@ -10,6 +10,8 @@
 #include "remote_node.h"
 #include "uuid_provider.h"
 #include "operation.h"
+#include "optp.h"
+
 #include <thread>
 #include <spdlog/spdlog.h>
 
@@ -21,9 +23,10 @@ static auto logger = std::make_shared<spdlog::logger>("remote_node", sink);
 
 namespace optp
 {
-	remote_node::remote_node(sockpp::tcp_socket&& remote_socket)
+	remote_node::remote_node(optp_wptr protocol, sockpp::tcp_socket&& remote_socket)
 		: m_remoteSocket(std::move(remote_socket))
-		, m_uuid(std::move(uuid_provider().provideRandomString()))
+		, m_uuid(uuid_provider().provideRandomString())
+		, m_protocol(protocol)
 	{
 		setupListener();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
@@ -46,7 +49,10 @@ namespace optp
 	interfaces::operation_shptr remote_node::handle(interfaces::operation_shptr operation)
 	{
 		logger->info("Handling remote operation with uuid {0}", operation->uuid());
-		return operation;
+		if (optp_shptr protocol = m_protocol.lock())
+		{
+			return protocol->handle(operation);
+		}
 	}
 
 	std::string remote_node::uuid() const

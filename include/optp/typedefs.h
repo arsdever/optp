@@ -12,6 +12,7 @@
 
 namespace optp
 {
+	class optp;
 	namespace interfaces
 	{
 		class node;
@@ -33,4 +34,9 @@ namespace optp
 		typedef operation_result& operation_result_ref;
 		typedef operation_result const& operation_result_cref;
 	}
+
+	typedef std::shared_ptr<optp> optp_shptr;
+	typedef std::weak_ptr<optp> optp_wptr;
+	typedef optp& optp_ref;
+	typedef optp const& optp_cref;
 }
