@@ -31,6 +31,9 @@ namespace optp
 
 		interfaces::node_wptr thisNode() const;
 
+		void connectToNode(optp_config::node_def_t const& node_def);
+		void disconnectFromNode(optp_config::node_def_t const& node_def);
+
 	private:
 		bool startServer();
 		bool connectToServer();
