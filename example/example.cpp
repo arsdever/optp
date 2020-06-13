@@ -11,7 +11,6 @@
 #include <operation.h>
 #include <uuid_provider.h>
 
-#include "fake_node.h"
 #include "interpreter.h"
 
 #include <spdlog/spdlog.h>

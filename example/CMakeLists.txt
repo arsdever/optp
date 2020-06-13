@@ -4,7 +4,6 @@ set(EXAMPLE_NAME ${PROJECT_NAME}_example)
 
 message(STATUS "Configuring the example executable")
 list(APPEND EXAMPLE_CLASS_FILES
-	fake_node
 	interpreter
 )
 
