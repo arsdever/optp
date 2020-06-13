@@ -5,6 +5,7 @@ set(EXAMPLE_NAME ${PROJECT_NAME}_example)
 message(STATUS "Configuring the example executable")
 list(APPEND EXAMPLE_CLASS_FILES
 	ping_operation
+	ping_operation_handler
 	interpreter
 )
 
@@ -15,7 +16,7 @@ foreach(EXAMPLE_CLASS ${EXAMPLE_CLASS_FILES})
 	list(APPEND EXAMPLE_FILES_LIST "${EXAMPLE_CLASS}.h")
 endforeach()
 
-add_executable(${EXAMPLE_NAME} "example.cpp" ${EXAMPLE_FILES_LIST})
+add_executable(${EXAMPLE_NAME} "example.cpp" ${EXAMPLE_FILES_LIST} "ping_operation_result.h")
 add_custom_command(TARGET ${EXAMPLE_NAME}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/test_config.json" ${CMAKE_BINARY_DIR}

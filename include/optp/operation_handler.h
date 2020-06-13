@@ -19,6 +19,8 @@ namespace optp
         public:
             virtual ~operation_handler() = default;
             virtual void handle(operation_wptr wop) = 0;
+			virtual node_wptr handlerNode() const = 0;
+			virtual void setHandlerNode(interfaces::node_wptr handler_node) = 0;
         };
     }
 }

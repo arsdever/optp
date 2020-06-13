@@ -36,7 +36,7 @@ namespace optp
 
 		void ping_operation::setResult(interfaces::operation_result_shptr result) 
 		{
-
+			operation::setResult(result);
 		}
 	}
 }

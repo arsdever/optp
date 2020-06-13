@@ -12,6 +12,8 @@ list(APPEND CLASS_FILES
 	uuid_provider
 	network_interfaces
 	node_def
+	operation_result
+	operation_handler
 )
 
 message(VERBOSE "Class files to be compiled")
