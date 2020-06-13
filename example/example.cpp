@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	volatile bool finished = false;
 
 	interpreter.registerCallback("send", [=](std::istream&) {
-		simple_operation operation;
+		optp::interfaces::operation_shptr operation = std::make_shared<simple_operation>();
 		if(const optp::interfaces::node_shptr node = protocol1->thisNode().lock())
 			node->execute(operation);
 	});
