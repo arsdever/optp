@@ -13,23 +13,13 @@
 #include <network_interfaces.h>
 
 #include "interpreter.h"
+#include "ping_operation.h"
 
 #include <spdlog/spdlog.h>
+
 #include <thread>
 #include <fstream>
-
-class simple_operation : public optp::interfaces::operation
-{
-public:
-	inline simple_operation() : m_uuid(std::move(optp::uuid_provider().provideRandomString())) {}
-	inline void deserialize(std::string const& dataBuffer) override { m_uuid = dataBuffer; }
-	inline std::string serialize() const override { return uuid(); }
-	inline std::string uuid() const override { return m_uuid; }
-	inline void setResult(optp::interfaces::operation_result_shptr result) override {}
-
-private:
-	std::string m_uuid;
-};
+#include <iostream>
 
 int main(int argc, char** argv)
 {
@@ -39,10 +29,11 @@ int main(int argc, char** argv)
 	volatile bool finished = false;
 
 	interpreter.registerCallback("send", [&protocol](std::istream&) {
-		optp::interfaces::operation_shptr operation = std::make_shared<simple_operation>();
+		optp::interfaces::operation_shptr operation = std::make_shared<optp::test::ping_operation>();
 		optp::interfaces::node_wptr wnode = protocol->thisNode();
+		if(const optp::interfaces::node_shptr node = wnode.lock())
 			protocol->execute(operation);
-		});
+	});
 
 	auto finisher = [&finished](std::istream&) { finished = true; };
 
