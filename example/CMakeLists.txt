@@ -4,7 +4,6 @@ set(EXAMPLE_NAME ${PROJECT_NAME}_example)
 
 message(STATUS "Configuring the example executable")
 list(APPEND EXAMPLE_CLASS_FILES
-	fake_node
 	interpreter
 )
 
@@ -21,7 +20,11 @@ add_custom_command(TARGET ${EXAMPLE_NAME}
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/test_config.json" ${CMAKE_BINARY_DIR}
 )
 
-target_include_directories(${PROJECT_NAME}_example
+target_precompile_headers(${EXAMPLE_NAME}
+	PRIVATE ${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}/nlohmann/json.hpp
+)
+
+target_include_directories(${EXAMPLE_NAME}
 	PRIVATE ${CMAKE_SOURCE_DIR}
 		${CMAKE_SOURCE_DIR}/src
 		${CMAKE_BINARY_DIR}
@@ -30,15 +33,15 @@ target_include_directories(${PROJECT_NAME}_example
 		${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}
 )
 
-target_precompile_headers(${PROJECT_NAME}_example
+target_precompile_headers(${EXAMPLE_NAME}
 	PRIVATE ${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}/nlohmann/json.hpp
 )
 
-target_link_libraries(${PROJECT_NAME}_example
+target_link_libraries(${EXAMPLE_NAME}
 	PUBLIC optp
 )
 
-target_link_directories(${PROJECT_NAME}_example
+target_link_directories(${EXAMPLE_NAME}
 PRIVATE
 	${CONAN_LIB_DIRS_SOCKPP}
 	${CONAN_LIB_DIRS_SPDLOG}

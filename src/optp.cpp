@@ -40,8 +40,14 @@ namespace optp
 	}
 
 	optp::optp(std::string const& config_file_path)
-		: optp(config_file_path, std::move(std::make_shared<real_node>()))
-	{}
+		: cm_maxConnectionCount(0)
+		, m_configuration(optp_config::parse(config_file_path))
+		, m_thisNode(std::move(std::make_shared<real_node>(weak_from_this())))
+	{
+		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
+		startServer();
+		connectToServer();
+	}
 
 	optp::~optp()
 	{}
@@ -49,6 +55,65 @@ namespace optp
 	interfaces::node_wptr optp::thisNode() const
 	{
 		return m_thisNode;
+	}
+
+	interfaces::operation_shptr optp::execute(interfaces::operation_shptr operation)
+	{
+		// TODO: Make this to work in parallel for all nodes
+		m_thisNode->handle(operation);
+		for (interfaces::node_shptr remote : m_remotes)
+		{
+			remote->execute(operation);
+		}
+		return operation;
+	}
+
+	interfaces::operation_shptr optp::handle(interfaces::operation_shptr operation)
+	{
+		return m_thisNode->handle(operation);
+	}
+
+	void optp::connectToNode(optp_config::node_def_t const& node_def)
+	{
+		if (network_interfaces::global().is_local(node_def))
+		{
+			logger->info("Skipping the local node");
+			return;
+		}
+
+		if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool { return e->address() == node_def; }) == m_remotes.end())
+		{
+			sockpp::tcp_connector remote_socket({ node_def, OPTP_DEFAULT_PORT });
+			if (!remote_socket)
+			{
+				logger->info("Cannot connect to host server\n\t{0}", remote_socket.last_error_str());
+				return;
+			}
+
+			logger->info("Successfully connected to host {0}", node_def);
+			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(remote_socket));
+			m_remotes.insert(rnode);
+		}
+	}
+
+	void optp::disconnectFromNode(optp_config::node_def_t const& node_def)
+	{
+		optp::node_list_t::iterator node_it = findNode(node_def);
+		if (node_it == m_remotes.end())
+		{
+			logger->warn("Node doesn't exist in the connected nodes list");
+			return;
+		}
+		m_remotes.erase(node_it);
+	}
+
+	interfaces::node_wptr optp::getNode(optp_config::node_def_t const& node_def)
+	{
+		optp::node_list_t::iterator node_it = findNode(node_def);
+		if (node_it == m_remotes.end())
+			return interfaces::node_wptr();
+
+		return *node_it;
 	}
 
 	bool optp::startServer()
@@ -88,8 +153,7 @@ namespace optp
 				}
 
 				logger->info("Remote node was created for peer {0}", peer_address.to_string());
-				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(peer_socket));
-				std::static_pointer_cast<real_node>(pnode)->registerRemoteNode(rnode);
+				interfaces::node_shptr rnode = std::make_shared<remote_node>(optp.weak_from_this(), std::move(peer_socket));
 				remotes.insert(rnode);
 			}
 		}).detach();
@@ -99,29 +163,20 @@ namespace optp
 
 	bool optp::connectToServer()
 	{
-		for (optp_config::node_def_t node : m_configuration.cluster_definition()) {
-			if (network_interfaces::global().is_local(node))
-			{
-				logger->info("Skipping the local node");
-				continue;
-			}
-
-			if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node](interfaces::node_shptr const& e) -> bool { return e->address() == node; }) == m_remotes.end())
-			{
-				sockpp::tcp_connector remote_socket({ node, OPTP_DEFAULT_PORT });
-				if (!remote_socket)
-				{
-					logger->info("Cannot connect to host server\n\t{0}", remote_socket.last_error_str());
-					continue;
-				}
-
-				logger->info("Successfully connected to host {0}", node);
-				interfaces::node_shptr rnode = std::make_shared<remote_node>(std::move(remote_socket));
-				std::static_pointer_cast<real_node>(m_thisNode)->registerRemoteNode(rnode);
-				m_remotes.insert(rnode);
-			}
+		for (optp_config::node_def_t node : m_configuration.cluster_definition())
+		{
+			connectToNode(node);
 		}
 
 		return true;
+	}
+
+	optp::node_list_t::iterator optp::findNode(optp_config::node_def_t const& node_def)
+	{
+		optp::node_list_t::iterator node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool {
+			return e->address().find_first_of(node_def) != std::string::npos;
+			});
+
+		return node_it;
 	}
 }

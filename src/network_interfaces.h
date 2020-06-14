@@ -23,6 +23,7 @@ namespace optp
 		network_interfaces();
 		bool is_local(sockpp::sock_address const& address) const;
 		bool is_local(std::string const& address) const;
+		std::vector<std::string> localAddresses() const;
 
 		static network_interfaces& global();
 

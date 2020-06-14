@@ -17,24 +17,16 @@ namespace optp
 	class real_node : public interfaces::node
 	{
 	public:
-		typedef void (*execution_finished_cb) (interfaces::operation_ref);
+		real_node(optp_wptr protocol);
 
-	public:
-		real_node();
-
-		// interfaces::node started
 		std::string address() const override;
-		interfaces::operation_ref execute(interfaces::operation_ref operation) override;
-		interfaces::operation_ref handle(interfaces::operation_ref operation) override;
+		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
+		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
 		std::string uuid() const override;
-		// interfaces::node finished
-
-		void registerRemoteNode(interfaces::node_wptr remote_node);
-		static std::string getLocalIpAddress();
 
 	private:
 		std::string m_uuid;
-		std::string m_ipAddress; // TODO: Use lib specific ip address structure
+		optp_wptr m_protocol;
 		std::list<interfaces::node_wptr> m_remoteNodes;
 	};
 }

@@ -8,49 +8,39 @@
  */
 
 #include "real_node.h"
+#include "optp.h"
 #include "uuid_provider.h"
+#include <optp/operation.h>
 
 namespace optp
 {
-	real_node::real_node()
+	real_node::real_node(optp_wptr protocol)
 		: m_uuid(std::move(uuid_provider().provideRandomString()))
-		, m_ipAddress(getLocalIpAddress())
+		, m_protocol(protocol)
 	{
 	}
 
 	std::string real_node::address() const
 	{
-		return m_ipAddress;
+		return "127.0.0.1";
 	}
 	
-	interfaces::operation_ref real_node::execute(interfaces::operation_ref operation)
+	interfaces::operation_shptr real_node::execute(interfaces::operation_shptr operation)
 	{
-		for(interfaces::node_wptr wnode : m_remoteNodes)
+		if (optp_shptr protocol = m_protocol.lock())
 		{
-			if(const interfaces::node_shptr shnode = wnode.lock())
-				shnode->execute(operation);
+			return protocol->handle(operation);
 		}
-
-		return handle(operation);
-	}
-
-	interfaces::operation_ref real_node::handle(interfaces::operation_ref operation)
-	{
 		return operation;
 	}
 
-	void real_node::registerRemoteNode(interfaces::node_wptr remote_node)
+	interfaces::operation_shptr real_node::handle(interfaces::operation_shptr operation)
 	{
-		m_remoteNodes.push_back(remote_node);
+		return operation;
 	}
 	
 	std::string real_node::uuid() const
 	{
 		return m_uuid;
-	}
-	
-	std::string real_node::getLocalIpAddress()
-	{
-		return "127.0.0.1";
 	}
 }
