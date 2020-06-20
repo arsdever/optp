@@ -22,7 +22,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
 	endif()
 	if(CONAN_PROFILE)
 		list(APPEND CMD "-pr")
-		list(APPEND CMD "${CONAN_PROFILE}")
+		list(APPEND CMD "${CMAKE_SOURCE_DIR}${CONAN_PROFILE}")
 	endif()
 	execute_process(
 		COMMAND conan install . ${CMD}
