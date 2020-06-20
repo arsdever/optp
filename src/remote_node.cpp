@@ -53,6 +53,8 @@ namespace optp
 		{
 			return protocol->handle(operation);
 		}
+
+		return operation;
 	}
 
 	std::string remote_node::uuid() const
