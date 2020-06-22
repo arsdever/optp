@@ -64,12 +64,14 @@ int main(int argc, char** argv)
 	interpreter.registerCallback("connect", [&protocol](std::istream& stream) {
 		std::string address;
 		stream >> address;
-		protocol->connectToNode(address);
+		if (protocol)
+			protocol->connectToNode(address);
 		});
 	interpreter.registerCallback("disconnect", [&protocol](std::istream& stream) {
 		std::string address;
 		stream >> address;
-		protocol->disconnectFromNode(address);
+		if (protocol)
+			protocol->disconnectFromNode(address);
 		});
 	interpreter.registerCallback("ip", [&protocol](std::istream& stream) {
 		std::cout << "Local ip addresses are" << std::endl;
