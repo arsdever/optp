@@ -25,9 +25,9 @@ namespace optp
 			virtual operation_shptr execute(operation_shptr operation) = 0;
 			virtual operation_shptr handle(operation_shptr operation) = 0;
 			virtual void connectToNode(std::string const& ip_address) = 0;
-			virtual void disconnectFromNode(node_defwptr const& node_def) = 0;
+			virtual void disconnectFromNode(node_def_wptr const& node_def) = 0;
 			virtual void disconnectFromNode(node_wptr const& node_def) = 0;
-			virtual node_wptr getNode(node_defwptr const& node_def) const = 0;
+			virtual node_wptr getNode(node_def_wptr const& node_def) const = 0;
 			virtual node_wptr getNodeByIpAddress(std::string const& ip_address) const = 0;
 		};
 	}
