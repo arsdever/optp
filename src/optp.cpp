@@ -42,8 +42,8 @@ namespace optp
 	optp::optp(std::string const& config_file_path)
 		: cm_maxConnectionCount(0)
 		, m_configuration(optp_config::parse(config_file_path))
-		, m_thisNode(std::move(std::make_shared<real_node>(weak_from_this())))
 	{
+		m_thisNode = std::move(std::make_shared<real_node>(weak_from_this()));
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		startServer();
 		connectToServer();
