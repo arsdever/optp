@@ -22,6 +22,7 @@ namespace optp
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
 		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
 		std::string uuid() const override;
+		void setProtocol(interfaces::optp_wptr protocol) override;
 
 	private:
 		void setupListener();

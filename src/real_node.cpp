@@ -43,4 +43,9 @@ namespace optp
 	{
 		return m_uuid;
 	}
+
+	void real_node::setProtocol(interfaces::optp_wptr protocol)
+	{
+		m_protocol = protocol;
+	}
 }

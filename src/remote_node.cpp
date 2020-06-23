@@ -82,4 +82,9 @@ namespace optp
 			// TODO: Callback must be executed to notify about disconnection
 		}).detach();
 	}
+	
+	void remote_node::setProtocol(interfaces::optp_wptr protocol)
+	{
+		m_protocol = protocol;
+	}
 }

@@ -24,6 +24,7 @@ namespace optp
 			virtual interfaces::operation_shptr execute(interfaces::operation_shptr operation) = 0;
 			virtual interfaces::operation_shptr handle(interfaces::operation_shptr operation) = 0;
 			virtual std::string uuid() const = 0;
+			virtual void setProtocol(optp_wptr protocol) = 0;
 		};
 	}
 }
