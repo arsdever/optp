@@ -48,4 +48,9 @@ namespace optp
 	{
 		m_protocol = protocol;
 	}
+
+	interfaces::node_def_wptr real_node::getDefinition() const
+	{
+		return m_definition;
+	}
 }

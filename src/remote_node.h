@@ -23,6 +23,7 @@ namespace optp
 		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
 		std::string uuid() const override;
 		void setProtocol(interfaces::optp_wptr protocol) override;
+		interfaces::node_def_wptr getDefinition() const override;
 
 	private:
 		void setupListener();
@@ -31,5 +32,6 @@ namespace optp
 		sockpp::tcp_socket m_remoteSocket;
 		std::string m_uuid;
 		interfaces::optp_wptr m_protocol;
+		interfaces::node_def_shptr m_definition;
 	};
 }
