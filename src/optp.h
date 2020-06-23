@@ -13,6 +13,7 @@
 #include <optp_export.h>
 
 #include <optp/typedefs.h>
+#include <optp/optp.h>
 #include <optp/node.h>
 
 #include <string>
@@ -23,7 +24,7 @@
 
 namespace optp
 {
-	class OPTP_EXPORT optp : public std::enable_shared_from_this<optp>
+	class OPTP_EXPORT optp : interfaces::optp
 	{
 	private:
 		typedef std::unordered_set<interfaces::node_shptr> node_list_t;

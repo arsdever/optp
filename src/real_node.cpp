@@ -8,13 +8,13 @@
  */
 
 #include "real_node.h"
-#include "optp.h"
 #include "uuid_provider.h"
+#include <optp/optp.h>
 #include <optp/operation.h>
 
 namespace optp
 {
-	real_node::real_node(optp_wptr protocol)
+	real_node::real_node(interfaces::optp_wptr protocol)
 		: m_uuid(std::move(uuid_provider().provideRandomString()))
 		, m_protocol(protocol)
 	{
@@ -27,7 +27,7 @@ namespace optp
 	
 	interfaces::operation_shptr real_node::execute(interfaces::operation_shptr operation)
 	{
-		if (optp_shptr protocol = m_protocol.lock())
+		if (interfaces::optp_shptr protocol = m_protocol.lock())
 		{
 			return protocol->handle(operation);
 		}
