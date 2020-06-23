@@ -67,12 +67,12 @@ int main(int argc, char** argv)
 		if (protocol)
 			protocol->connectToNode(address);
 		});
-	interpreter.registerCallback("disconnect", [&protocol](std::istream& stream) {
-		std::string address;
-		stream >> address;
-		if (protocol)
-			protocol->disconnectFromNode(address);
-		});
+	//interpreter.registerCallback("disconnect", [&protocol](std::istream& stream) {
+	//	std::string address;
+	//	stream >> address;
+	//	if (protocol)
+	//		protocol->disconnectFromNode(address);
+	//	});
 	interpreter.registerCallback("ip", [&protocol](std::istream& stream) {
 		std::cout << "Local ip addresses are" << std::endl;
 		std::vector<std::string> local_ip_addresses = optp::network_interfaces::global().localAddresses();

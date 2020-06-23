@@ -13,6 +13,8 @@
 #include "real_node.h"
 #include "network_interfaces.h"
 
+#include <optp/node_def.h>
+
 #include <thread>	
 
 #include <sockpp/tcp_acceptor.h>
@@ -73,7 +75,7 @@ namespace optp
 		return m_thisNode->handle(operation);
 	}
 
-	void optp::connectToNode(optp_config::node_def_t const& node_def)
+	void optp::connectToNode(std::string const& node_def)
 	{
 		if (network_interfaces::global().is_local(node_def))
 		{
@@ -96,9 +98,19 @@ namespace optp
 		}
 	}
 
-	void optp::disconnectFromNode(optp_config::node_def_t const& node_def)
+	void optp::disconnectFromNode(interfaces::node_wptr const& node_def)
 	{
-		optp::node_list_t::iterator node_it = findNode(node_def);
+		if (const interfaces::node_shptr shnode = node_def.lock())
+			disconnectFromNode(shnode->getDefinition());
+	}
+
+	void optp::disconnectFromNode(interfaces::node_def_wptr const& node_def)
+	{
+		std::string addr = "";
+		if (const interfaces::node_def_shptr shnodedef = node_def.lock())
+			addr = shnodedef->address();
+
+		optp::node_list_t::const_iterator node_it = findNode(addr);
 		if (node_it == m_remotes.end())
 		{
 			logger->warn("Node doesn't exist in the connected nodes list");
@@ -107,9 +119,17 @@ namespace optp
 		m_remotes.erase(node_it);
 	}
 
-	interfaces::node_wptr optp::getNode(optp_config::node_def_t const& node_def)
+	interfaces::node_wptr optp::getNode(interfaces::node_def_wptr const& node_def) const
 	{
-		optp::node_list_t::iterator node_it = findNode(node_def);
+		if (const interfaces::node_def_shptr shnodedef = node_def.lock())
+		{
+			return getNodeByIpAddress(shnodedef->address());
+		}
+	}
+
+	interfaces::node_wptr optp::getNodeByIpAddress(std::string const& ip_address) const
+	{
+		optp::node_list_t::const_iterator node_it = findNode(ip_address);
 		if (node_it == m_remotes.end())
 			return interfaces::node_wptr();
 
@@ -171,9 +191,9 @@ namespace optp
 		return true;
 	}
 
-	optp::node_list_t::iterator optp::findNode(optp_config::node_def_t const& node_def)
+	optp::node_list_t::const_iterator optp::findNode(optp_config::node_def_t const& node_def) const
 	{
-		optp::node_list_t::iterator node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool {
+		optp::node_list_t::const_iterator node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool {
 			return e->address().find_first_of(node_def) != std::string::npos;
 			});
 
