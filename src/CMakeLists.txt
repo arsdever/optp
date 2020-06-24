@@ -11,6 +11,7 @@ list(APPEND CLASS_FILES
 	remote_node
 	uuid_provider
 	network_interfaces
+	node_def
 )
 
 message(VERBOSE "Class files to be compiled")

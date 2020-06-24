@@ -10,11 +10,12 @@
 #include "remote_node.h"
 #include "uuid_provider.h"
 #include "operation.h"
+#include "node_def.h"
+
 #include <optp/optp.h>
 
 #include <thread>
 #include <spdlog/spdlog.h>
-
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 
@@ -27,6 +28,7 @@ namespace optp
 		: m_remoteSocket(std::move(remote_socket))
 		, m_uuid(uuid_provider().provideRandomString())
 		, m_protocol(protocol)
+		, m_definition(nullptr)
 	{
 		setupListener();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
