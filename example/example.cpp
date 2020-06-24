@@ -33,7 +33,7 @@ private:
 
 int main(int argc, char** argv)
 {
-	std::unique_ptr<optp::optp> protocol;
+	std::shared_ptr<optp::optp> protocol;
 
 	optp::test::interpreter interpreter(std::cin);
 	volatile bool finished = false;

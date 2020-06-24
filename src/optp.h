@@ -24,7 +24,7 @@
 
 namespace optp
 {
-	class OPTP_EXPORT optp : interfaces::optp
+	class OPTP_EXPORT optp : public interfaces::optp
 	{
 	private:
 		typedef std::unordered_set<interfaces::node_shptr> node_list_t;
@@ -49,6 +49,7 @@ namespace optp
 		bool startServer();
 		bool connectToServer();
 		node_list_t::const_iterator findNode(optp_config::node_def_t const& node_def) const;
+		void server_listener();
 
 	private:
 		const int cm_maxConnectionCount;

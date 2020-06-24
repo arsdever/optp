@@ -12,6 +12,7 @@
 #include "remote_node.h"
 #include "real_node.h"
 #include "network_interfaces.h"
+#include "node_def.h"
 
 #include <optp/node_def.h>
 
@@ -93,6 +94,17 @@ namespace optp
 			}
 
 			logger->info("Successfully connected to host {0}", node_def);
+
+			if (const interfaces::node_shptr current_node = thisNode().lock())
+			{
+				if (const interfaces::node_def_shptr current_node_def = current_node->getDefinition().lock())
+				{
+					std::string def_message = current_node_def->serialize();
+					logger->info("Sending the node information\n\t{0}", def_message);
+					remote_socket.write(def_message);
+				}
+			}
+
 			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(remote_socket));
 			m_remotes.insert(rnode);
 		}
@@ -125,6 +137,8 @@ namespace optp
 		{
 			return getNodeByIpAddress(shnodedef->address());
 		}
+
+		return interfaces::node_wptr();
 	}
 
 	interfaces::node_wptr optp::getNodeByIpAddress(std::string const& ip_address) const
@@ -147,36 +161,7 @@ namespace optp
 		}
 
 		// Create a main server thread to listen for incoming connections.
-		std::thread([&optp = *this, &remotes = m_remotes, &server = m_serverSocket, &maxConCount = cm_maxConnectionCount, &pnode = m_thisNode]() -> bool {
-			while (1)
-			{
-				sockpp::inet_address peer_address;
-				sockpp::tcp_socket peer_socket = server.accept(&peer_address);
-
-				logger->info("Peer is connecting with address {0}", peer_address.to_string());
-				if (!peer_socket)
-				{
-					logger->error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
-					continue;
-				}
-
-				if (maxConCount > 0)
-				{
-					if (remotes.size() == maxConCount)
-					{
-						// max connection count reached
-						const std::string err_msg = "Maximum connection count reached.";
-						logger->error(err_msg);
-						peer_socket.write(err_msg);
-						peer_socket.close();
-					}
-				}
-
-				logger->info("Remote node was created for peer {0}", peer_address.to_string());
-				interfaces::node_shptr rnode = std::make_shared<remote_node>(optp.weak_from_this(), std::move(peer_socket));
-				remotes.insert(rnode);
-			}
-		}).detach();
+		std::thread{ &optp::server_listener, this }.detach();
 
 		return true;
 	}
@@ -198,5 +183,37 @@ namespace optp
 			});
 
 		return node_it;
+	}
+
+	void optp::server_listener()
+	{
+		while (1)
+		{
+			sockpp::inet_address peer_address;
+			sockpp::tcp_socket peer_socket = m_serverSocket.accept(&peer_address);
+
+			logger->info("Peer is connecting with address {0}", peer_address.to_string());
+			if (!peer_socket)
+			{
+				logger->error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
+				continue;
+			}
+
+			if (cm_maxConnectionCount > 0)
+			{
+				if (m_remotes.size() == cm_maxConnectionCount)
+				{
+					// max connection count reached
+					const std::string err_msg = "Maximum connection count reached.";
+					logger->error(err_msg);
+					peer_socket.write(err_msg);
+					peer_socket.close();
+				}
+			}
+
+			logger->info("Remote node was created for peer {0}", peer_address.to_string());
+			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(peer_socket));
+			m_remotes.insert(rnode);
+		}
 	}
 }

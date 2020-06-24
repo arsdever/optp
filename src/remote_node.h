@@ -16,7 +16,7 @@ namespace optp
 	class remote_node : public interfaces::node
 	{
 	public:
-		remote_node(interfaces::optp_wptr protocol, sockpp::tcp_socket&& remote_socket);
+		remote_node(interfaces::optp_wptr protocol, sockpp::tcp_socket&& remote_socket, interfaces::node_def_shptr def = nullptr);
 
 		std::string address() const override; // TODO: Should be changed to address type
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
@@ -26,6 +26,7 @@ namespace optp
 		interfaces::node_def_wptr getDefinition() const override;
 
 	private:
+		void listener();
 		void setupListener();
 
 	private:
