@@ -29,7 +29,7 @@ namespace optp
 		: m_remoteSocket(std::move(remote_socket))
 		, m_uuid(uuid_provider().provideRandomString())
 		, m_protocol(protocol)
-		, m_definition(nullptr)
+		, m_definition(def)
 	{
 		setupListener();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
