@@ -79,28 +79,6 @@ namespace optp
 		{
 			std::string message(buffer, read_bytes);
 
-			if (m_definition == nullptr)
-			{
-				logger->info("node_def received from node with address {0}\n\t{1}", m_remoteSocket.address().to_string(), message);
-				m_definition = std::move(std::make_shared<node_def>(""));
-				m_definition->deserialize(message);
-
-				logger->info("Trying to respond with current node's definition");
-				if (const interfaces::optp_shptr protocol = m_protocol.lock())
-				{
-					if (const interfaces::node_shptr local_node = protocol->thisNode().lock())
-					{
-						if (const interfaces::node_def_shptr local_node_def = local_node->getDefinition().lock())
-						{
-							std::string def_message = local_node_def->serialize();
-							logger->info("Sending the node information\n\t{0}", def_message);
-							m_remoteSocket.write(def_message);
-						}
-					}
-				}
-				continue;
-			}
-
 			interfaces::operation_shptr op = std::make_shared<operation>();
 			logger->info("Deserializing incoming message\n{0}", message);
 			op->deserialize(message);
