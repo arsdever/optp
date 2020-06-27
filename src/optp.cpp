@@ -12,6 +12,9 @@
 #include "remote_node.h"
 #include "real_node.h"
 #include "network_interfaces.h"
+#include "node_def.h"
+
+#include <optp/node_def.h>
 
 #include <thread>	
 
@@ -73,32 +76,65 @@ namespace optp
 		return m_thisNode->handle(operation);
 	}
 
-	void optp::connectToNode(optp_config::node_def_t const& node_def)
+	void optp::connectToNode(std::string const& node_address)
 	{
-		if (network_interfaces::global().is_local(node_def))
+		if (network_interfaces::global().is_local(node_address))
 		{
 			logger->info("Skipping the local node");
 			return;
 		}
 
-		if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool { return e->address() == node_def; }) == m_remotes.end())
+		if (std::find_if(m_remotes.begin(), m_remotes.end(), [&node_address](interfaces::node_shptr const& e) -> bool { return e->address() == node_address; }) == m_remotes.end())
 		{
-			sockpp::tcp_connector remote_socket({ node_def, OPTP_DEFAULT_PORT });
+			sockpp::tcp_connector remote_socket({ node_address, OPTP_DEFAULT_PORT });
 			if (!remote_socket)
 			{
 				logger->info("Cannot connect to host server\n\t{0}", remote_socket.last_error_str());
 				return;
 			}
 
-			logger->info("Successfully connected to host {0}", node_def);
-			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(remote_socket));
+			logger->info("Successfully connected to host {0}", node_address);
+
+			if (const interfaces::node_shptr current_node = thisNode().lock())
+			{
+				if (const interfaces::node_def_shptr current_node_def = current_node->getDefinition().lock())
+				{
+					std::string def_message = current_node_def->serialize();
+					logger->info("Sending the node information\n\t{0}", def_message);
+					remote_socket.write(def_message);
+				}
+			}
+
+			char buffer[1024];
+			size_t read_bytes;
+
+			interfaces::node_def_shptr def = std::move(std::make_shared<node_def>(""));
+			while ((read_bytes = remote_socket.read(buffer, sizeof(buffer))) > 0)
+			{
+				std::string message(buffer, read_bytes);
+				logger->info("node_def received from node with address {0}\n\t{1}", remote_socket.address().to_string(), message);
+				def->deserialize(message);
+				break;
+			}
+
+			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(remote_socket), std::move(def));
 			m_remotes.insert(rnode);
 		}
 	}
 
-	void optp::disconnectFromNode(optp_config::node_def_t const& node_def)
+	void optp::disconnectFromNode(interfaces::node_wptr const& node_def)
 	{
-		optp::node_list_t::iterator node_it = findNode(node_def);
+		if (const interfaces::node_shptr shnode = node_def.lock())
+			disconnectFromNode(shnode->getDefinition());
+	}
+
+	void optp::disconnectFromNode(interfaces::node_def_wptr const& node_def)
+	{
+		std::string addr = "";
+		if (const interfaces::node_def_shptr shnodedef = node_def.lock())
+			addr = shnodedef->address();
+
+		optp::node_list_t::const_iterator node_it = findNode(addr);
 		if (node_it == m_remotes.end())
 		{
 			logger->warn("Node doesn't exist in the connected nodes list");
@@ -107,9 +143,19 @@ namespace optp
 		m_remotes.erase(node_it);
 	}
 
-	interfaces::node_wptr optp::getNode(optp_config::node_def_t const& node_def)
+	interfaces::node_wptr optp::getNode(interfaces::node_def_wptr const& node_def) const
 	{
-		optp::node_list_t::iterator node_it = findNode(node_def);
+		if (const interfaces::node_def_shptr shnodedef = node_def.lock())
+		{
+			return getNodeByIpAddress(shnodedef->address());
+		}
+
+		return interfaces::node_wptr();
+	}
+
+	interfaces::node_wptr optp::getNodeByIpAddress(std::string const& ip_address) const
+	{
+		optp::node_list_t::const_iterator node_it = findNode(ip_address);
 		if (node_it == m_remotes.end())
 			return interfaces::node_wptr();
 
@@ -127,36 +173,7 @@ namespace optp
 		}
 
 		// Create a main server thread to listen for incoming connections.
-		std::thread([&optp = *this, &remotes = m_remotes, &server = m_serverSocket, &maxConCount = cm_maxConnectionCount, &pnode = m_thisNode]() -> bool {
-			while (1)
-			{
-				sockpp::inet_address peer_address;
-				sockpp::tcp_socket peer_socket = server.accept(&peer_address);
-
-				logger->info("Peer is connecting with address {0}", peer_address.to_string());
-				if (!peer_socket)
-				{
-					logger->error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
-					continue;
-				}
-
-				if (maxConCount > 0)
-				{
-					if (remotes.size() == maxConCount)
-					{
-						// max connection count reached
-						const std::string err_msg = "Maximum connection count reached.";
-						logger->error(err_msg);
-						peer_socket.write(err_msg);
-						peer_socket.close();
-					}
-				}
-
-				logger->info("Remote node was created for peer {0}", peer_address.to_string());
-				interfaces::node_shptr rnode = std::make_shared<remote_node>(optp.weak_from_this(), std::move(peer_socket));
-				remotes.insert(rnode);
-			}
-		}).detach();
+		std::thread{ &optp::server_listener, this }.detach();
 
 		return true;
 	}
@@ -171,12 +188,66 @@ namespace optp
 		return true;
 	}
 
-	optp::node_list_t::iterator optp::findNode(optp_config::node_def_t const& node_def)
+	optp::node_list_t::const_iterator optp::findNode(optp_config::node_def_t const& node_def) const
 	{
-		optp::node_list_t::iterator node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool {
+		optp::node_list_t::const_iterator node_it = std::find_if(m_remotes.begin(), m_remotes.end(), [&node_def](interfaces::node_shptr const& e) -> bool {
 			return e->address().find_first_of(node_def) != std::string::npos;
 			});
 
 		return node_it;
+	}
+
+	void optp::server_listener()
+	{
+		while (1)
+		{
+			sockpp::inet_address peer_address;
+			sockpp::tcp_socket peer_socket = m_serverSocket.accept(&peer_address);
+
+			logger->info("Peer is connecting with address {0}", peer_address.to_string());
+			if (!peer_socket)
+			{
+				logger->error("Peer socket connection problem\n\t{0}", peer_socket.last_error_str());
+				continue;
+			}
+
+			if (cm_maxConnectionCount > 0)
+			{
+				if (m_remotes.size() == cm_maxConnectionCount)
+				{
+					// max connection count reached
+					const std::string err_msg = "Maximum connection count reached.";
+					logger->error(err_msg);
+					peer_socket.write(err_msg);
+					peer_socket.close();
+				}
+			}
+
+			char buffer[1024];
+			size_t read_bytes;
+
+			interfaces::node_def_shptr def = std::move(std::make_shared<node_def>(""));
+			while ((read_bytes = peer_socket.read(buffer, sizeof(buffer))) > 0)
+			{
+				std::string message(buffer, read_bytes);
+				logger->info("node_def received from node with address {0}\n\t{1}", peer_socket.address().to_string(), message);
+				def->deserialize(message);
+				break;
+			}
+
+			if (const interfaces::node_shptr local_node = thisNode().lock())
+			{
+				if (const interfaces::node_def_shptr local_node_def = local_node->getDefinition().lock())
+				{
+					std::string def_message = local_node_def->serialize();
+					logger->info("Sending the node information\n\t{0}", def_message);
+					peer_socket.write(def_message);
+				}
+			}
+
+			logger->info("Remote node was created for peer {0}", peer_address.to_string());
+			interfaces::node_shptr rnode = std::make_shared<remote_node>(weak_from_this(), std::move(peer_socket), std::move(def));
+			m_remotes.insert(rnode);
+		}
 	}
 }

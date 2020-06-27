@@ -12,10 +12,11 @@
 
 namespace optp
 {
-	class optp;
 	namespace interfaces
 	{
+		class optp;
 		class node;
+		class node_def;
 		class operation;
 		class operation_result;
 
@@ -23,6 +24,11 @@ namespace optp
 		typedef std::weak_ptr<node> node_wptr;
 		typedef node& node_ref;
 		typedef node const& node_cref;
+
+		typedef std::shared_ptr<node_def> node_def_shptr;
+		typedef std::weak_ptr<node_def> node_def_wptr;
+		typedef node_def& node_def_ref;
+		typedef node_def const& node_def_cref;
 
 		typedef std::shared_ptr<operation> operation_shptr;
 		typedef std::weak_ptr<operation> operation_wptr;
@@ -33,10 +39,10 @@ namespace optp
 		typedef std::weak_ptr<operation_result> operation_result_wptr;
 		typedef operation_result& operation_result_ref;
 		typedef operation_result const& operation_result_cref;
-	}
 
-	typedef std::shared_ptr<optp> optp_shptr;
-	typedef std::weak_ptr<optp> optp_wptr;
-	typedef optp& optp_ref;
-	typedef optp const& optp_cref;
+		typedef std::shared_ptr<optp> optp_shptr;
+		typedef std::weak_ptr<optp> optp_wptr;
+		typedef optp& optp_ref;
+		typedef optp const& optp_cref;
+	}
 }

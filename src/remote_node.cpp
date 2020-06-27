@@ -10,11 +10,13 @@
 #include "remote_node.h"
 #include "uuid_provider.h"
 #include "operation.h"
-#include "optp.h"
+#include "node_def.h"
+
+#include <optp/optp.h>
 
 #include <thread>
-#include <spdlog/spdlog.h>
 
+#include <spdlog/spdlog.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 
@@ -23,10 +25,11 @@ static auto logger = std::make_shared<spdlog::logger>("remote_node", sink);
 
 namespace optp
 {
-	remote_node::remote_node(optp_wptr protocol, sockpp::tcp_socket&& remote_socket)
+	remote_node::remote_node(interfaces::optp_wptr protocol, sockpp::tcp_socket&& remote_socket, interfaces::node_def_shptr def)
 		: m_remoteSocket(std::move(remote_socket))
 		, m_uuid(uuid_provider().provideRandomString())
 		, m_protocol(protocol)
+		, m_definition(def)
 	{
 		setupListener();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
@@ -49,7 +52,7 @@ namespace optp
 	interfaces::operation_shptr remote_node::handle(interfaces::operation_shptr operation)
 	{
 		logger->info("Handling remote operation with uuid {0}", operation->uuid());
-		if (optp_shptr protocol = m_protocol.lock())
+		if (interfaces::optp_shptr protocol = m_protocol.lock())
 		{
 			return protocol->handle(operation);
 		}
@@ -64,22 +67,36 @@ namespace optp
 
 	void remote_node::setupListener()
 	{
-		std::thread([&node = *this, &peer_socket = m_remoteSocket]() {
-			char buffer[1024];
-			size_t read_bytes;
+		std::thread{ &remote_node::listener, this }.detach();
+	}
 
-			while ((read_bytes = peer_socket.read(buffer, sizeof(buffer))) > 0)
-			{
-				interfaces::operation_shptr op = std::make_shared<operation>();
-				std::string message(buffer, read_bytes);
-				logger->info("Deserializing incoming message\n{0}", message);
-				op->deserialize(message);
-				logger->info("Remote operation received with uuid {0}", op->uuid());
-				node.handle(op);
-			}
+	void remote_node::listener()
+	{
+		char buffer[1024];
+		size_t read_bytes;
 
-			logger->info("Remote node disconnected {0}", node.address());
-			// TODO: Callback must be executed to notify about disconnection
-		}).detach();
+		while ((read_bytes = m_remoteSocket.read(buffer, sizeof(buffer))) > 0)
+		{
+			std::string message(buffer, read_bytes);
+
+			interfaces::operation_shptr op = std::make_shared<operation>();
+			logger->info("Deserializing incoming message\n{0}", message);
+			op->deserialize(message);
+			logger->info("Remote operation received with uuid {0}", op->uuid());
+			handle(op);
+		}
+
+		logger->info("Remote node disconnected {0}", address());
+		// TODO: Callback must be executed to notify about disconnection
+	}
+	
+	void remote_node::setProtocol(interfaces::optp_wptr protocol)
+	{
+		m_protocol = protocol;
+	}
+
+	interfaces::node_def_wptr remote_node::getDefinition() const
+	{
+		return m_definition;
 	}
 }

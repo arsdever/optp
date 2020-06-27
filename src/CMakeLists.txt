@@ -11,6 +11,7 @@ list(APPEND CLASS_FILES
 	remote_node
 	uuid_provider
 	network_interfaces
+	node_def
 )
 
 message(VERBOSE "Class files to be compiled")
@@ -23,7 +24,7 @@ endforeach()
 file(GLOB INTERFACE_FOLDER "${CMAKE_SOURCE_DIR}/include/optp/*")
 list(APPEND HEADER_FILES_LIST ${INTERFACE_FOLDER})
 
-add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} )
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST})
 target_link_libraries(${PROJECT_NAME}
 PRIVATE
 	${CONAN_LIBS_SOCKPP}
