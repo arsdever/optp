@@ -26,12 +26,12 @@ namespace optp
 
 		std::string ping_operation::serialize() const 
 		{
-			return "ping";
+			return std::string("operation ") + uuid() + " ping";
 		}
 
 		void ping_operation::deserialize(std::string const& data) 
 		{
-
+			operation::deserialize(data);
 		}
 
 		void ping_operation::setResult(interfaces::operation_result_shptr result) 

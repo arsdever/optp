@@ -48,11 +48,6 @@ namespace optp
 		}
 		return operation;
 	}
-
-	interfaces::operation_shptr real_node::handle(interfaces::operation_shptr operation)
-	{
-		return operation;
-	}
 	
 	std::string real_node::uuid() const
 	{

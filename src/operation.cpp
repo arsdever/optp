@@ -11,6 +11,8 @@
 #include "uuid_provider.h"
 #include <optp/operation_result.h>
 
+#include <sstream>
+
 namespace optp
 {
 	operation::operation()
@@ -25,12 +27,20 @@ namespace optp
 
 	std::string operation::serialize() const
 	{
-		return "operation";
+		return std::string("operation ") + uuid();
 	}
 
 	void operation::deserialize(std::string const& data)
 	{
-		return;
+		std::istringstream iss(data);
+		std::vector<std::string> result{
+			std::istream_iterator<std::string>(iss), {}
+		};
+
+		if (result.size() < 2)
+			return;
+
+		m_uuid = result[1];
 	}
 
 	int operation::type() const
