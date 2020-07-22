@@ -23,7 +23,6 @@ namespace optp
 			virtual ~node_def() = default;
 
 			virtual std::string address() const = 0; // TODO: Should be changed to address type
-			virtual std::string uuid() const = 0;
 		};
 	}
 }

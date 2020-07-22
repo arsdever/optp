@@ -14,9 +14,8 @@
 #include "network_interfaces.h"
 #include "node_def.h"
 
-#include <optp/node_def.h>
-
-#include <thread>	
+#include <thread>
+#include <sstream>
 
 #include <sockpp/tcp_acceptor.h>
 #include <sockpp/tcp_connector.h>
@@ -99,7 +98,9 @@ namespace optp
 			{
 				if (const interfaces::node_def_shptr current_node_def = current_node->getDefinition().lock())
 				{
-					std::string def_message = current_node_def->serialize();
+					std::stringstream strm;
+					current_node_def->serialize(strm);
+					std::string def_message = strm.str();
 					logger->info("Sending the node information\n\t{0}", def_message);
 					remote_socket.write(def_message);
 				}
@@ -112,8 +113,9 @@ namespace optp
 			while ((read_bytes = remote_socket.read(buffer, sizeof(buffer))) > 0)
 			{
 				std::string message(buffer, read_bytes);
+				std::stringstream strm(message);
 				logger->info("node_def received from node with address {0}\n\t{1}", remote_socket.address().to_string(), message);
-				def->deserialize(message);
+				def->deserialize(strm);
 				break;
 			}
 
@@ -230,8 +232,9 @@ namespace optp
 			while ((read_bytes = peer_socket.read(buffer, sizeof(buffer))) > 0)
 			{
 				std::string message(buffer, read_bytes);
+				std::stringstream strm(message);
 				logger->info("node_def received from node with address {0}\n\t{1}", peer_socket.address().to_string(), message);
-				def->deserialize(message);
+				def->deserialize(strm);
 				break;
 			}
 
@@ -239,7 +242,9 @@ namespace optp
 			{
 				if (const interfaces::node_def_shptr local_node_def = local_node->getDefinition().lock())
 				{
-					std::string def_message = local_node_def->serialize();
+					std::stringstream strm;
+					local_node_def->serialize(strm);
+					std::string def_message = strm.str();
 					logger->info("Sending the node information\n\t{0}", def_message);
 					peer_socket.write(def_message);
 				}

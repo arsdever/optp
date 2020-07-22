@@ -10,19 +10,26 @@
 
 #include <optp/operation_result.h>
 
+#include "object.h"
+
 namespace optp
 {
-	class operation_result : public interfaces::operation_result
+	class operation_result
+		: public interfaces::operation_result
+		, public object
 	{
 	public:
-		operation_result(std::string const& node_uuid);
+		operation_result(std::string const& node_uuid, std::string const& operation_uuid);
+		std::string operationUuid() const override;
 		std::string nodeUuid() const override;
 		std::string uuid() const override;
-		std::string serialize() const override;
-		void deserialize(std::string const& data) override;
+
+		std::ostream& serialize(std::ostream& stm) const override;
+		std::istream& deserialize(std::istream& stm) override;
 
 	private:
 		std::string m_nodeUuid;
+		std::string m_operationUuid;
 		std::string m_uuid;
 	};
 }

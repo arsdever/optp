@@ -16,40 +16,46 @@
 namespace optp
 {
 	operation::operation()
-		: m_uuid(uuid_provider().provideRandomString())
+		: object(object_metatype::OPERATION)
+		, __operation_type(-1)
 	{
 	}
 
-	std::string operation::uuid() const
+	std::ostream& operation::serialize(std::ostream& stm) const
 	{
-		return m_uuid;
+		object::serialize(stm);
+		stm << type();
+		return stm;
 	}
 
-	std::string operation::serialize() const
+	std::istream& operation::deserialize(std::istream& stm)
 	{
-		return std::string("operation ") + uuid();
-	}
-
-	void operation::deserialize(std::string const& data)
-	{
-		std::istringstream iss(data);
-		std::vector<std::string> result{
-			std::istream_iterator<std::string>(iss), {}
-		};
-
-		if (result.size() < 2)
-			return;
-
-		m_uuid = result[1];
+		object::deserialize(stm);
+		stm >> __operation_type;
+		return stm;
 	}
 
 	int operation::type() const
 	{
-		return -1;
+		return __operation_type;
+	}
+
+	void operation::setType(int type)
+	{
+		__operation_type = type;
 	}
 
 	void operation::setResult(interfaces::operation_result_shptr result)
 	{
-		//m_nodeSpecResult[result->nodeUuid()] = result;
+		m_nodeSpecResult[result->nodeUuid()] = result;
+	}
+
+	std::list<interfaces::operation_result_wptr> operation::getResults() const
+	{
+		std::list<interfaces::operation_result_wptr> result_list;
+		for (std::pair<std::string, interfaces::operation_result_shptr> const& result_pair : m_nodeSpecResult)
+			result_list.push_back(result_pair.second);
+		
+		return result_list;
 	}
 }

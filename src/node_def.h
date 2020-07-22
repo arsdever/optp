@@ -10,10 +10,11 @@
 #pragma once
 
 #include <optp/node_def.h>
+#include "object.h"
 
 namespace optp
 {
-	class node_def : public interfaces::node_def
+	class node_def : public interfaces::node_def, public object
 	{
 	public:
 		node_def(std::string const& address);
@@ -21,8 +22,8 @@ namespace optp
 		std::string address() const override;
 		std::string uuid() const override;
 
-		std::string serialize() const override;
-		void deserialize(std::string const& dataBuffer) override;
+		std::ostream& serialize(std::ostream& stm) const override;
+		std::istream& deserialize(std::istream& stm) override;
 
 	private:
 		std::string m_uuid;

@@ -7,6 +7,7 @@ list(APPEND CLASS_FILES
 	operation
 	optp
 	optp_config
+	object
 	real_node
 	remote_node
 	uuid_provider
@@ -26,7 +27,7 @@ endforeach()
 file(GLOB INTERFACE_FOLDER "${CMAKE_SOURCE_DIR}/include/optp/*")
 list(APPEND HEADER_FILES_LIST ${INTERFACE_FOLDER})
 
-add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST})
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} "typedefs.h")
 target_link_libraries(${PROJECT_NAME}
 PRIVATE
 	${CONAN_LIBS_SOCKPP}

@@ -9,12 +9,12 @@
 
 #include "node_def.h"
 #include "uuid_provider.h"
-#include <sstream>
 
 namespace optp
 {
 	node_def::node_def(std::string const& address)
-		: m_address(address)
+		: object(object_metatype::NODE_DEF)
+		, m_address(address)
 		, m_uuid(uuid_provider().provideRandomString())
 	{}
 
@@ -28,22 +28,16 @@ namespace optp
 		return m_uuid;
 	}
 
-	std::string node_def::serialize() const
+	std::ostream& node_def::serialize(std::ostream& stm) const
 	{
-		return std::string("node_def ") + uuid() + " " + address();
+		object::serialize(stm);
+		stm << address();
+		return stm;
 	}
 
-	void node_def::deserialize(std::string const& dataBuffer)
+	std::istream& node_def::deserialize(std::istream& stm)
 	{
-		std::istringstream iss(dataBuffer);
-		std::vector<std::string> result{
-			std::istream_iterator<std::string>(iss), {}
-		};
-
-		if (result.size() != 3)
-			return;
-
-		m_uuid = result[1];
-		m_address = result[2];
+		stm >> m_address;
+		return stm;
 	}
 }

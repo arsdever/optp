@@ -16,22 +16,7 @@ namespace optp
 	{
 		ping_operation::ping_operation()
 		{
-			
-		}
-
-		int ping_operation::type() const 
-		{
-			return (int) operation_types::PingOperation;
-		}
-
-		std::string ping_operation::serialize() const 
-		{
-			return std::string("operation ") + uuid() + " ping";
-		}
-
-		void ping_operation::deserialize(std::string const& data) 
-		{
-			operation::deserialize(data);
+			setType((int)operation_types::PingOperation);
 		}
 
 		void ping_operation::setResult(interfaces::operation_result_shptr result) 

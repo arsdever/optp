@@ -18,7 +18,8 @@
 namespace optp
 {
 	real_node::real_node(interfaces::optp_wptr protocol)
-		: m_uuid(std::move(uuid_provider().provideRandomString()))
+		: object(object_metatype::NODE)
+		, m_uuid(std::move(uuid_provider().provideRandomString()))
 		, m_protocol(protocol)
 		, m_definition(std::move(std::make_shared<node_def>("127.0.0.1")))
 	{

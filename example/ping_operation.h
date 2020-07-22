@@ -22,9 +22,6 @@ namespace optp
 		{
 		public:
 			ping_operation();
-			int type() const override;
-			std::string serialize() const override;
-			void deserialize(std::string const& data) override;
 			void setResult(interfaces::operation_result_shptr result) override;
 		};
 	}

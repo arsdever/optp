@@ -10,7 +10,7 @@
 #pragma once
 
 #include <optp/typedefs.h>
-#include <string>
+#include <ostream>
 
 namespace optp
 {
@@ -19,7 +19,7 @@ namespace optp
 		class serializable
 		{
 		public:
-			virtual std::string serialize() const = 0;
+			virtual std::ostream& serialize(std::ostream& stm) const = 0;
 		};
 	}
 }

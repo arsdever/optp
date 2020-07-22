@@ -17,8 +17,8 @@ namespace optp
 		class ping_operation_result : public operation_result
 		{
 		public:
-			inline ping_operation_result(std::string const& nodeUuid)
-				: operation_result(nodeUuid)
+			inline ping_operation_result(std::string const& nodeUuid, std::string const& operationUuid)
+				: operation_result(nodeUuid, operationUuid)
 			{}
 			inline std::string message() const { return "received"; }
 		};

@@ -22,7 +22,7 @@ namespace optp
 			{
 				if (const auto node_shptr = handlerNode().lock())
 				{
-					interfaces::operation_result_shptr result = std::make_shared<ping_operation_result>(node_shptr->uuid());
+					interfaces::operation_result_shptr result = std::make_shared<ping_operation_result>(std::dynamic_pointer_cast<object>(node_shptr)->uuid(), ping->uuid());
 					ping->setResult(result);
 				}
 			}

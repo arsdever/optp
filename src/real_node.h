@@ -12,9 +12,13 @@
 #include <list>
 #include <chrono>
 
+#include "object.h"
+
 namespace optp
 {
-	class real_node : public interfaces::node
+	class real_node
+		: public interfaces::node
+		, public object
 	{
 	public:
 		real_node(interfaces::optp_wptr protocol);

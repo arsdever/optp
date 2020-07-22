@@ -4,3 +4,4 @@ build*
 tags
 CMakeSettings.json
 example/test_config.json
+object_metatypes.h

@@ -14,20 +14,26 @@
 
 #include <optp_export.h>
 
+#include "object.h"
+
 namespace optp
 {
-	class OPTP_EXPORT operation : public interfaces::operation
+	class OPTP_EXPORT operation : public interfaces::operation, public object
 	{
 	public:
 		operation();
-		std::string uuid() const override;
 		int type() const override;
-		std::string serialize() const override;
-		void deserialize(std::string const& data) override;
 		void setResult(interfaces::operation_result_shptr result) override;
+		std::list<interfaces::operation_result_wptr> getResults() const override;
+
+		std::ostream& serialize(std::ostream& stm) const override;
+		std::istream& deserialize(std::istream& stm) override;
+
+	protected:
+		void setType(int type) override;
 
 	private:
-		std::string m_uuid;
 		std::unordered_map<std::string, interfaces::operation_result_shptr> m_nodeSpecResult;
+		int __operation_type;
 	};
 }

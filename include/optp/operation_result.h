@@ -12,18 +12,19 @@
 #include <optp/typedefs.h>
 #include <optp/serializable.h>
 #include <optp/deserializable.h>
+#include <optp/object.h>
 #include <string>
 
 namespace optp
 {
 	namespace interfaces
 	{
-		class operation_result : public serializable, public deserializable
+		class operation_result : std::enable_shared_from_this<operation_result>
 		{
 		public:
 			virtual ~operation_result() = default;
+			virtual std::string operationUuid() const = 0;
 			virtual std::string nodeUuid() const = 0;
-			virtual std::string uuid() const = 0;
 		};
 	}
 }

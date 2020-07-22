@@ -11,10 +11,12 @@
 #include "uuid_provider.h"
 #include "operation.h"
 #include "node_def.h"
+#include "typedefs.h"
 
 #include <optp/optp.h>
 
 #include <thread>
+#include <sstream>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/spdlog.h>
@@ -26,8 +28,8 @@ static auto logger = std::make_shared<spdlog::logger>("remote_node", sink);
 namespace optp
 {
 	remote_node::remote_node(interfaces::optp_wptr protocol, sockpp::tcp_socket&& remote_socket, interfaces::node_def_shptr def)
-		: m_remoteSocket(std::move(remote_socket))
-		, m_uuid(uuid_provider().provideRandomString())
+		: object(object_metatype::NODE)
+		, m_remoteSocket(std::move(remote_socket))
 		, m_protocol(protocol)
 		, m_definition(def)
 	{
@@ -40,24 +42,21 @@ namespace optp
 		return m_remoteSocket.address().to_string();
 	}
 
-	interfaces::operation_shptr remote_node::execute(interfaces::operation_shptr operation)
+	interfaces::operation_shptr remote_node::execute(interfaces::operation_shptr op)
 	{
-		logger->info("Sending operation with uuid {0} to remote", operation->uuid());
-		std::string message = operation->serialize();
+		logger->info("Sending operation with uuid {0} to remote", std::static_pointer_cast<operation>(op)->uuid());
+		std::stringstream strm;
+		std::static_pointer_cast<operation>(op)->serialize(strm);
+		std::string message = strm.str();
 		size_t bytes_written = m_remoteSocket.write(message);
 		logger->info("{0} bytes were sent\n{1}", bytes_written, message);
-		return operation;
+		return op;
 	}
 
-	interfaces::operation_shptr remote_node::handle(interfaces::operation_shptr operation)
+	interfaces::operation_shptr remote_node::handle(interfaces::operation_shptr op)
 	{
-		logger->info("Handling remote operation with uuid {0}", operation->uuid());
-		return operation;
-	}
-
-	std::string remote_node::uuid() const
-	{
-		return m_uuid;
+		logger->info("Handling remote operation with uuid {0}", std::static_pointer_cast<operation>(op)->uuid());
+		return op;
 	}
 
 	void remote_node::setupListener()
@@ -74,9 +73,11 @@ namespace optp
 		{
 			std::string message(buffer, read_bytes);
 
-			interfaces::operation_shptr op = std::make_shared<operation>();
+			operation_shptr op = std::make_shared<operation>();
 			logger->info("Deserializing incoming message\n{0}", message);
-			op->deserialize(message);
+
+			std::stringstream strm(message);
+			op->deserialize(strm);
 			logger->info("Remote operation received with uuid {0}", op->uuid());
 			handle(op);
 		}

@@ -1,0 +1,9 @@
+#pragma once
+
+namespace optp
+{
+	enum class object_metatype
+	{
+		@OBJECT_METATYPES@
+	};
+}

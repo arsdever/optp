@@ -23,7 +23,6 @@ namespace optp
 			virtual std::string address() const = 0; // TODO: Should be changed to address type
 			virtual interfaces::operation_shptr execute(interfaces::operation_shptr operation) = 0;
 			virtual interfaces::operation_shptr handle(interfaces::operation_shptr operation) = 0;
-			virtual std::string uuid() const = 0;
 			virtual void setProtocol(optp_wptr protocol) = 0;
 			virtual node_def_wptr getDefinition() const = 0;
 		};

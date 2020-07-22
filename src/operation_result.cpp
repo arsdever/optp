@@ -13,10 +13,17 @@
 
 namespace optp
 {
-	operation_result::operation_result(std::string const& nodeUuid)
-		: m_nodeUuid(nodeUuid)
+	operation_result::operation_result(std::string const& node_uuid, std::string const& operation_uuid)
+		: object(object_metatype::OPERATION_RESULT)
+		, m_nodeUuid(node_uuid)
+		, m_operationUuid(operation_uuid)
 		, m_uuid(uuid_provider().provideRandomString())
 	{}
+
+	std::string operation_result::operationUuid() const
+	{
+		return m_operationUuid;
+	}
 
 	std::string operation_result::nodeUuid() const
 	{
@@ -28,13 +35,13 @@ namespace optp
 		return m_uuid;
 	}
 
-	std::string operation_result::serialize() const
+	std::ostream& operation_result::serialize(std::ostream& stm) const
 	{
-		return "operation_result";
+		return object::serialize(stm);
 	}
 
-	void operation_result::deserialize(std::string const& data)
+	std::istream& operation_result::deserialize(std::istream& stm)
 	{
-		return;
+		return object::deserialize(stm);
 	}
 }

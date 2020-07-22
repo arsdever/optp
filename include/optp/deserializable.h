@@ -10,7 +10,7 @@
 #pragma once
 
 #include <optp/typedefs.h>
-#include <string>
+#include <istream>
 
 namespace optp
 {
@@ -19,7 +19,7 @@ namespace optp
 		class deserializable
 		{
 		public:
-			virtual void deserialize(std::string const& dataBuffer) = 0;
+			virtual std::istream& deserialize(std::istream& stm) = 0;
 		};
 	}
 }
