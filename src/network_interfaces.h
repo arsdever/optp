@@ -12,7 +12,6 @@
 #include <optp_export.h>
 #include <sockpp/sock_address.h>
 
-#include <memory>
 #include <vector>
 
 namespace optp

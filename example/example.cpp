@@ -20,6 +20,7 @@
 #include <thread>
 #include <fstream>
 #include <iostream>
+#include <node_def.h>
 
 int main(int argc, char** argv)
 {
@@ -73,7 +74,19 @@ int main(int argc, char** argv)
 		}
 		std::cout << std::endl;
 		});
-
+	interpreter.registerCallback("thisnode", [&protocol](std::istream& stream) {
+		if (optp::interfaces::node_shptr nodesh = protocol->thisNode().lock())
+		{
+			if (optp::interfaces::object_shptr def = std::dynamic_pointer_cast<optp::interfaces::object>(nodesh->getDefinition().lock()))
+			{
+				std::cout << def->uuid() << std::endl;
+			}
+		}
+		});
+	interpreter.registerCallback("remotes", [&protocol](std::istream& stream) {
+		protocol->forEachRemote([](optp::interfaces::node_wptr node) {
+			if (optp::interfaces::node_shptr shnode = node.lock()) std::cout << shnode->address() << std::endl; });
+		});
 	interpreter.exec();
 
 	while (!finished)

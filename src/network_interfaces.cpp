@@ -1,8 +1,6 @@
 #include "network_interfaces.h"
 #include <sockpp/inet_address.h>
 #include <sockpp/inet6_address.h>
-#include <string>
-#include <vector>
 
 #if defined (_WIN32)
 #include <iphlpapi.h>

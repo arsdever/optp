@@ -16,6 +16,8 @@ class Spdlog(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        cmake.definitions["SPDLOG_FMT_EXTERNAL"] = "ON"
+        cmake.definitions["SPDLOG_ENABLE_PCH"] = "ON"
         cmake.build()
 
     def package(self):

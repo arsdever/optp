@@ -24,7 +24,7 @@ namespace optp
 
 	std::string real_node::address() const
 	{
-		return "127.0.0.1";
+		return "127.0.0.1"; // TODO: Fix the implementation
 	}
 	
 	interfaces::operation_shptr real_node::execute(interfaces::operation_shptr operation)
@@ -45,11 +45,6 @@ namespace optp
 			handler_iterator->second->handle(operation);
 		}
 		return operation;
-	}
-
-	void real_node::setProtocol(interfaces::optp_wptr protocol)
-	{
-		m_protocol = protocol;
 	}
 
 	interfaces::node_def_wptr real_node::getDefinition() const

@@ -13,7 +13,7 @@
 #else
 #include <optp/object_metatypes.h>
 #include <optp/typedefs.h>
-#include <string>
+//#include <string>
 
 namespace optp
 {

@@ -16,14 +16,14 @@
 #include <optp/optp.h>
 #include <optp/node.h>
 
-#include <string>
-#include <memory>
 #include <unordered_set>
-#include <sockpp/acceptor.h>
 
+#include <sockpp/acceptor.h>
 
 namespace optp
 {
+	class connection_listener;
+
 	class OPTP_EXPORT optp : public interfaces::optp
 	{
 	private:
@@ -39,6 +39,7 @@ namespace optp
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation);
 		interfaces::operation_shptr handle(interfaces::operation_shptr operation);
 
+		void forEachRemote(std::function<void(interfaces::node_wptr)> function, bool skip_valid_check = true);
 		void connectToNode(std::string const& ip_address) override;
 		void disconnectFromNode(interfaces::node_def_wptr const& node_def) override;
 		void disconnectFromNode(interfaces::node_wptr const& node_def) override;
@@ -48,14 +49,14 @@ namespace optp
 	private:
 		bool startServer();
 		bool connectToServer();
+
 		node_list_t::const_iterator findNode(optp_config::node_def_t const& node_def) const;
-		void server_listener();
 
 	private:
 		const int cm_maxConnectionCount;
 		optp_config m_configuration;
 		interfaces::node_shptr m_thisNode;
 		node_list_t m_remotes;
-		sockpp::acceptor m_serverSocket;
+		std::unique_ptr<connection_listener> m_connectionListener;
 	};
 }

@@ -36,7 +36,7 @@ target_include_directories(${EXAMPLE_NAME}
 )
 
 target_precompile_headers(${EXAMPLE_NAME}
-	PRIVATE ${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}/nlohmann/json.hpp
+	PRIVATE ../src/pch.h
 )
 
 target_link_libraries(${EXAMPLE_NAME}

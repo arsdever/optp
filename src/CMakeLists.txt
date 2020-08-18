@@ -4,18 +4,33 @@ include(GNUInstallDirs)
 
 message(STATUS "Configuring the ${PROJECT_NAME} library")
 list(APPEND CLASS_FILES
-	operation
 	optp
-	optp_config
 	object
+	node_def
 	real_node
+	operation
+	optp_config
 	remote_node
 	uuid_provider
-	network_interfaces
-	node_def
 	operation_result
 	operation_handler
+	network_interfaces
+	connection_listener
 )
+
+set(METATYPE_LIST "operation;node_def;operation_result")
+foreach(fname ${METATYPE_LIST})
+	string(TOUPPER ${fname} FNAME)
+	list(APPEND OBJECT_METATYPES_LIST_U "${FNAME} = object_type_id<${fname}>::value")
+	list(APPEND OBJECT_METATYPES_LIST_L ${fname})
+	string(APPEND FWD_DECLARE_CLASSES "\n\tclass ${fname};")
+endforeach()
+string(JOIN ",\n\t\t\t" OBJECT_METATYPES_UPPER_LIST ${OBJECT_METATYPES_LIST_U})
+string(JOIN ",\n\t\t\t" OBJECT_METATYPES_LOWER_LIST ${OBJECT_METATYPES_LIST_L})
+#string(JOIN "\n\t" FWD_DECLARE_CLASSES ${FWD_DECLARE_CLASSES_})
+configure_file("${CMAKE_SOURCE_DIR}/cmake/object_metatypes.h.in"
+	"${CMAKE_SOURCE_DIR}/include/optp/object_metatypes.h"
+	@ONLY)
 
 message(VERBOSE "Class files to be compiled")
 foreach(CLASS ${CLASS_FILES})
@@ -27,7 +42,7 @@ endforeach()
 file(GLOB INTERFACE_FOLDER "${CMAKE_SOURCE_DIR}/include/optp/*")
 list(APPEND HEADER_FILES_LIST ${INTERFACE_FOLDER})
 
-add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} "typedefs.h")
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} "typedefs.h" "pch.h")
 
 target_link_libraries(${PROJECT_NAME}
 PRIVATE
@@ -37,7 +52,7 @@ PRIVATE
 )
 
 target_precompile_headers(${PROJECT_NAME}
-	PRIVATE ${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}/nlohmann/json.hpp
+	PRIVATE pch.h
 )
 
 target_link_directories(${PROJECT_NAME}

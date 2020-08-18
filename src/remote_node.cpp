@@ -21,6 +21,8 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 
+#include <sockpp/tcp_socket.h>
+
 static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 static auto logger = std::make_shared<spdlog::logger>("remote_node", sink);
 
@@ -30,14 +32,29 @@ namespace optp
 		: m_remoteSocket(std::move(remote_socket))
 		, m_protocol(protocol)
 		, m_definition(def)
+		, m_address(def->address())
 	{
-		setupListener();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
+		std::thread{ &remote_node::listener, this }.detach();
+	}
+
+	remote_node::~remote_node()
+	{
+		logger->info("Closing the remote socket");
+		// Close the socket
+		m_remoteSocket.shutdown();
+		m_remoteSocket.close();
+		m_remoteSocket.destroy();
+
+		logger->info("Stopping the listener thread");
+		// Stop the listener loop
+
+		logger->info("Removing the remote_node associated with ip {0}", address());
 	}
 
 	std::string remote_node::address() const
 	{
-		return m_remoteSocket.address().to_string();
+		return m_address;
 	}
 
 	interfaces::operation_shptr remote_node::execute(interfaces::operation_shptr op)
@@ -57,24 +74,23 @@ namespace optp
 		return op;
 	}
 
-	void remote_node::setupListener()
-	{
-		std::thread{ &remote_node::listener, this }.detach();
-	}
-
 	void remote_node::listener()
 	{
 		char buffer[1024];
-		size_t read_bytes;
+		int read_bytes;
 
 		while ((read_bytes = m_remoteSocket.read(buffer, sizeof(buffer))) > 0)
 		{
 			std::string message(buffer, read_bytes);
-			logger->info("Deserializing incoming message\n{0}", message);
+			logger->info("Incoming message\n\tFrom node:\n\t\tNode UUID: {0}\n\t\tNode address: {1}\n\t\tMessage: {2}",
+				std::dynamic_pointer_cast<interfaces::object>(m_definition)->uuid(),
+				address(),
+				message);
 			std::istringstream strm(message);
+			std::istringstream type_id_stream(message.substr(0, 5));
 
 			int type_id;
-			strm >> type_id;
+			type_id_stream >> type_id;
 			interfaces::deserializable_shptr ptr = std::dynamic_pointer_cast<interfaces::deserializable>(object_metatypes::object_ctor_mapping::map[type_id]());
 
 			ptr->deserialize(strm);
@@ -84,12 +100,6 @@ namespace optp
 		}
 
 		logger->info("Remote node disconnected {0}", address());
-		// TODO: Callback must be executed to notify about disconnection
-	}
-	
-	void remote_node::setProtocol(interfaces::optp_wptr protocol)
-	{
-		m_protocol = protocol;
 	}
 
 	interfaces::node_def_wptr remote_node::getDefinition() const

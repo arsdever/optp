@@ -4,6 +4,8 @@ set(PROJECT_NAME optp)
 project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
+set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
+
 option(CONAN_REFERENCE "Set the conan reference username/tag pair")
 option(CONAN_PROFILE "Set the conan profile")
 
@@ -14,20 +16,6 @@ else()
 	set(OTHER_LIBS pthread)
 endif()
 
-set(METATYPE_LIST "operation;node_def;operation_result")
-foreach(fname ${METATYPE_LIST})
-	string(TOUPPER ${fname} FNAME)
-	list(APPEND OBJECT_METATYPES_LIST_U "${FNAME} = object_type_id<${fname}>::value")
-	list(APPEND OBJECT_METATYPES_LIST_L ${fname})
-	string(APPEND FWD_DECLARE_CLASSES "\n\tclass ${fname};")
-endforeach()
-string(JOIN ",\n\t\t\t" OBJECT_METATYPES_UPPER_LIST ${OBJECT_METATYPES_LIST_U})
-string(JOIN ",\n\t\t\t" OBJECT_METATYPES_LOWER_LIST ${OBJECT_METATYPES_LIST_L})
-#string(JOIN "\n\t" FWD_DECLARE_CLASSES ${FWD_DECLARE_CLASSES_})
-configure_file("${CMAKE_SOURCE_DIR}/cmake/object_metatypes.h.in"
-	"${CMAKE_SOURCE_DIR}/include/optp/object_metatypes.h"
-	@ONLY)
-
 # === Installing conan dependencies ============================================
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
 	file(COPY ${CMAKE_SOURCE_DIR}/conanfile.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -37,7 +25,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
 	endif()
 	if(CONAN_PROFILE)
 		list(APPEND CMD "-pr")
-		list(APPEND CMD "${CMAKE_SOURCE_DIR}${CONAN_PROFILE}")
+		list(APPEND CMD "${CMAKE_SOURCE_DIR}/${CONAN_PROFILE}")
 	endif()
 	execute_process(
 		COMMAND conan install . ${CMD}

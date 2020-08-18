@@ -32,16 +32,13 @@ namespace optp
 	std::ostream& node_def::serialize(std::ostream& stm) const
 	{
 		object::serialize(stm);
-		stm << address();
 		return stm;
 	}
 
 
 	std::istream& node_def::deserialize(std::istream& stm)
 	{
-		std::string address;
-		stm >> address;
-		setAddress(address);
+		object::deserialize(stm);
 		return stm;
 	}
 }
