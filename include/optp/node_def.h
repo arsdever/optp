@@ -17,12 +17,13 @@ namespace optp
 {
 	namespace interfaces
 	{
-		class node_def : public serializable, public deserializable
+		class node_def
 		{
 		public:
 			virtual ~node_def() = default;
 
 			virtual std::string address() const = 0; // TODO: Should be changed to address type
+			virtual void setAddress(std::string const& address) = 0;
 		};
 	}
 }

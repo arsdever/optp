@@ -15,9 +15,8 @@ namespace optp
 	namespace test
 	{
 		ping_operation::ping_operation()
-		{
-			setType((int)operation_types::PingOperation);
-		}
+			: operation((int)operation_types::PingOperation)
+		{}
 
 		void ping_operation::setResult(interfaces::operation_result_shptr result) 
 		{

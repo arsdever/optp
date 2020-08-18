@@ -21,17 +21,15 @@ namespace optp
 		, public interfaces::deserializable
 	{
 	public:
-		object(object_metatype metatype);
+		object();
 
-		std::string uuid() const override;
-		interfaces::object_shptr clone() const override;
-		int metatype() const override;
+		std::string uuid() const { return __uuid; }
+		virtual int metatype() const = 0;
 
 		std::ostream& serialize(std::ostream& stm) const override;
 		std::istream& deserialize(std::istream& stm) override;
 
 	private:
 		std::string __uuid;
-		object_metatype __metatype;
 	};
 }

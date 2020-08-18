@@ -29,7 +29,7 @@ namespace optp
 			object() = default;
 			virtual ~object() = default;
 			virtual std::string uuid() const = 0;
-			virtual object_shptr clone() const = 0;
+			//virtual object_shptr clone() const = 0;
 			virtual int metatype() const = 0;
 		};
 	}

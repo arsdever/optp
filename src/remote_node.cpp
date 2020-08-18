@@ -8,7 +8,6 @@
  */
 
 #include "remote_node.h"
-#include "uuid_provider.h"
 #include "operation.h"
 #include "node_def.h"
 #include "typedefs.h"
@@ -28,8 +27,7 @@ static auto logger = std::make_shared<spdlog::logger>("remote_node", sink);
 namespace optp
 {
 	remote_node::remote_node(interfaces::optp_wptr protocol, sockpp::tcp_socket&& remote_socket, interfaces::node_def_shptr def)
-		: object(object_metatype::NODE)
-		, m_remoteSocket(std::move(remote_socket))
+		: m_remoteSocket(std::move(remote_socket))
 		, m_protocol(protocol)
 		, m_definition(def)
 	{
@@ -72,14 +70,17 @@ namespace optp
 		while ((read_bytes = m_remoteSocket.read(buffer, sizeof(buffer))) > 0)
 		{
 			std::string message(buffer, read_bytes);
-
-			operation_shptr op = std::make_shared<operation>();
 			logger->info("Deserializing incoming message\n{0}", message);
+			std::istringstream strm(message);
 
-			std::stringstream strm(message);
-			op->deserialize(strm);
-			logger->info("Remote operation received with uuid {0}", op->uuid());
-			handle(op);
+			int type_id;
+			strm >> type_id;
+			interfaces::deserializable_shptr ptr = std::dynamic_pointer_cast<interfaces::deserializable>(object_metatypes::object_ctor_mapping::map[type_id]());
+
+			ptr->deserialize(strm);
+			interfaces::object_shptr optr = std::dynamic_pointer_cast<interfaces::object>(ptr);
+			logger->info("Remote operation received with uuid {0}", optr->uuid());
+			//handle(optr);
 		}
 
 		logger->info("Remote node disconnected {0}", address());

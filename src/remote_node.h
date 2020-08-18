@@ -17,7 +17,6 @@ namespace optp
 {
 	class remote_node
 		: public interfaces::node
-		, public object
 	{
 	public:
 		remote_node(interfaces::optp_wptr protocol, sockpp::tcp_socket&& remote_socket, interfaces::node_def_shptr def = nullptr);

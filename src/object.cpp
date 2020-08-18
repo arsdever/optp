@@ -8,35 +8,27 @@
  */
 
 #include "object.h"
+
 #include "uuid_provider.h"
 
 namespace optp
 {
-	object::object(object_metatype metatype)
-		: __uuid(std::move(uuid_provider().provideRandomString(64)))
-		, __metatype(metatype)
+	std::string normalize(int data, int size = 5)
 	{
+		std::string txt = std::to_string(data);
+		while (txt.size() < size)
+			txt = '0' + txt;
 
+		return txt;
 	}
 
-	std::string object::uuid() const
-	{
-		return __uuid;
-	}
-
-	interfaces::object_shptr object::clone() const
-	{
-		return nullptr;
-	}
-
-	int object::metatype() const
-	{
-		return (int)__metatype;
-	}
+	object::object()
+		: __uuid(uuid_provider().provideRandomString(64))
+	{}
 
 	std::ostream& object::serialize(std::ostream& stm) const
 	{
-		stm << uuid() << metatype();
+		stm << normalize(metatype()) << uuid();
 		return stm;
 	}
 
@@ -47,7 +39,6 @@ namespace optp
 		__uuid = std::string(uuid, 64);
 		int mt;
 		stm >> mt;
-		__metatype = (object_metatype)mt;
 		return stm;
 	}
 }

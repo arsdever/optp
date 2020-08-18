@@ -8,14 +8,15 @@
  */
 
 #include "node_def.h"
-#include "uuid_provider.h"
 
 namespace optp
 {
+	node_def::node_def()
+		: m_address()
+	{}
+
 	node_def::node_def(std::string const& address)
-		: object(object_metatype::NODE_DEF)
-		, m_address(address)
-		, m_uuid(uuid_provider().provideRandomString())
+		: m_address(address)
 	{}
 
 	std::string node_def::address() const
@@ -23,9 +24,9 @@ namespace optp
 		return m_address;
 	}
 
-	std::string node_def::uuid() const
+	void node_def::setAddress(std::string const& address)
 	{
-		return m_uuid;
+		m_address = address;
 	}
 
 	std::ostream& node_def::serialize(std::ostream& stm) const
@@ -35,9 +36,12 @@ namespace optp
 		return stm;
 	}
 
+
 	std::istream& node_def::deserialize(std::istream& stm)
 	{
-		stm >> m_address;
+		std::string address;
+		stm >> address;
+		setAddress(address);
 		return stm;
 	}
 }

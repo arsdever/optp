@@ -9,6 +9,8 @@
 
 #include "optp.h"
 
+#include "operation.h"
+#include "operation_result.h"
 #include "remote_node.h"
 #include "real_node.h"
 #include "network_interfaces.h"
@@ -22,6 +24,7 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/ansicolor_sink.h>
+#include <optp/object_metatypes.h>
 
 static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 static auto logger = std::make_shared<spdlog::logger>("optp", sink);
@@ -36,6 +39,7 @@ namespace optp
 		, m_configuration(optp_config::parse(config_file_path))
 		, m_thisNode(node)
 	{
+		object_metatypes::object_ctor_mapping_generator::generate();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		startServer();
 		connectToServer();
@@ -45,6 +49,7 @@ namespace optp
 		: cm_maxConnectionCount(0)
 		, m_configuration(optp_config::parse(config_file_path))
 	{
+		object_metatypes::object_ctor_mapping_generator::generate();
 		m_thisNode = std::move(std::make_shared<real_node>(weak_from_this()));
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		startServer();
@@ -96,7 +101,7 @@ namespace optp
 
 			if (const interfaces::node_shptr current_node = thisNode().lock())
 			{
-				if (const interfaces::node_def_shptr current_node_def = current_node->getDefinition().lock())
+				if (const interfaces::serializable_shptr current_node_def = std::dynamic_pointer_cast<interfaces::serializable>(current_node->getDefinition().lock()))
 				{
 					std::stringstream strm;
 					current_node_def->serialize(strm);
@@ -115,7 +120,8 @@ namespace optp
 				std::string message(buffer, read_bytes);
 				std::stringstream strm(message);
 				logger->info("node_def received from node with address {0}\n\t{1}", remote_socket.address().to_string(), message);
-				def->deserialize(strm);
+				interfaces::deserializable_shptr ptr = std::dynamic_pointer_cast<interfaces::deserializable>(def);
+				ptr->deserialize(strm);
 				break;
 			}
 
@@ -234,13 +240,14 @@ namespace optp
 				std::string message(buffer, read_bytes);
 				std::stringstream strm(message);
 				logger->info("node_def received from node with address {0}\n\t{1}", peer_socket.address().to_string(), message);
-				def->deserialize(strm);
+				interfaces::deserializable_shptr ptr = std::dynamic_pointer_cast<interfaces::deserializable>(def);
+				ptr->deserialize(strm);
 				break;
 			}
 
 			if (const interfaces::node_shptr local_node = thisNode().lock())
 			{
-				if (const interfaces::node_def_shptr local_node_def = local_node->getDefinition().lock())
+				if (const interfaces::serializable_shptr local_node_def = std::dynamic_pointer_cast<interfaces::serializable>(local_node->getDefinition().lock()))
 				{
 					std::stringstream strm;
 					local_node_def->serialize(strm);

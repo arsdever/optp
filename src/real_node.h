@@ -12,13 +12,9 @@
 #include <list>
 #include <chrono>
 
-#include "object.h"
-
 namespace optp
 {
-	class real_node
-		: public interfaces::node
-		, public object
+	class real_node : public interfaces::node
 	{
 	public:
 		real_node(interfaces::optp_wptr protocol);
@@ -26,14 +22,12 @@ namespace optp
 		std::string address() const override;
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
 		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
-		std::string uuid() const override;
 		void setProtocol(interfaces::optp_wptr protocol) override;
 		interfaces::node_def_wptr getDefinition() const override;
 
 		void registerOperationHandler(int operation_type, interfaces::operation_handler_shptr handler);
 
 	private:
-		std::string m_uuid;
 		interfaces::optp_wptr m_protocol;
 		std::list<interfaces::node_wptr> m_remoteNodes;
 		interfaces::node_def_shptr m_definition;

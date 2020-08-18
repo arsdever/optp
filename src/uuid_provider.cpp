@@ -14,6 +14,11 @@
 
 namespace optp
 {
+	std::string generateUuid(size_t length)
+	{
+		return uuid_provider().provideRandomString(length);
+	}
+
 	uuid_provider::srander::srander()
 	{
 		srand(time(0));

@@ -8,7 +8,6 @@
  */
 
 #include "operation.h"
-#include "uuid_provider.h"
 #include <optp/operation_result.h>
 
 #include <sstream>
@@ -16,10 +15,12 @@
 namespace optp
 {
 	operation::operation()
-		: object(object_metatype::OPERATION)
-		, __operation_type(-1)
-	{
-	}
+		: __operation_type(-1)
+	{}
+
+	operation::operation(int type)
+		: __operation_type(type)
+	{}
 
 	std::ostream& operation::serialize(std::ostream& stm) const
 	{

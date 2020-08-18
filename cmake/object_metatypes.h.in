@@ -1,9 +1,29 @@
 #pragma once
 
+#include <memory>
+#include <optp/typedefs.h>
+
+#define CUSTOM_CONSTRUCTOR_TYPE optp::interfaces::object_shptr
+#include <optp/constructor.h>
+
 namespace optp
-{
-	enum class object_metatype
+{@FWD_DECLARE_CLASSES@
+
+	namespace object_metatypes
 	{
-		@OBJECT_METATYPES@
-	};
+		typedef ctor::type_list<
+			@OBJECT_METATYPES_LOWER_LIST@
+		> object_metatypes_list;
+
+		typedef ctor::constructor_mapping<object_metatypes::object_metatypes_list> object_ctor_mapping;
+		typedef ctor::constructor_mapping_generator<object_metatypes::object_metatypes_list> object_ctor_mapping_generator;
+
+		template <typename T>
+		using object_type_id = ctor::id_of<T, object_metatypes::object_metatypes_list>;
+
+		enum class object_metatype
+		{
+			@OBJECT_METATYPES_UPPER_LIST@
+		};
+	}
 }

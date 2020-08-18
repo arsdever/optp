@@ -19,6 +19,8 @@ namespace optp
 		class object;
 		class node_def;
 		class operation;
+		class serializable;
+		class deserializable;
 		class operation_result;
 		class operation_handler;
 
@@ -56,5 +58,15 @@ namespace optp
 		typedef std::weak_ptr<operation_handler> operation_handler_wptr;
 		typedef operation_handler& operation_handler_ref;
 		typedef operation_handler const& operation_handler_cref;
+
+		typedef std::shared_ptr<serializable> serializable_shptr;
+		typedef std::weak_ptr<serializable> serializable_wptr;
+		typedef serializable& serializable_ref;
+		typedef serializable const& serializable_cref;
+
+		typedef std::shared_ptr<deserializable> deserializable_shptr;
+		typedef std::weak_ptr<deserializable> deserializable_wptr;
+		typedef deserializable& deserializable_ref;
+		typedef deserializable const& deserializable_cref;
 	}
 }
