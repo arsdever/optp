@@ -21,6 +21,7 @@
 #include <fstream>
 #include <iostream>
 #include <node_def.h>
+#include <operations/node_uuid_getter_op.h>
 
 int main(int argc, char** argv)
 {
@@ -86,6 +87,22 @@ int main(int argc, char** argv)
 	interpreter.registerCallback("remotes", [&protocol](std::istream& stream) {
 		protocol->forEachRemote([](optp::interfaces::node_wptr node) {
 			if (optp::interfaces::node_shptr shnode = node.lock()) std::cout << shnode->address() << std::endl; });
+		});
+	interpreter.registerCallback("getUuid", [&protocol](std::istream& stream) {
+			optp::interfaces::operation_shptr operation = std::make_shared<optp::operations::node_uuid_getter_operation>();
+			optp::interfaces::node_wptr wnode = protocol->thisNode();
+			if (const optp::interfaces::node_shptr node = wnode.lock())
+				protocol->execute(operation);
+
+			std::list<optp::interfaces::operation_result_wptr> results = operation->getResults();
+			std::cout << "=== The results are ===" << std::endl;
+			for (optp::interfaces::operation_result_wptr wres : results)
+			{
+				if (const optp::operation_result_shptr res = std::dynamic_pointer_cast<optp::operation_result>(wres.lock()))
+				{
+					std::cout << res->data() << std::endl;
+				}
+			}
 		});
 	interpreter.exec();
 

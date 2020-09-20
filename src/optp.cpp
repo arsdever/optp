@@ -18,6 +18,8 @@
 #include "connection_listener.h"
 #include <optp/object_metatypes.h>
 
+#include "operations/node_uuid_getter_op.h"
+
 static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 static auto logger = std::make_shared<spdlog::logger>("optp", sink);
 
@@ -26,6 +28,26 @@ extern const int OPTP_DEFAULT_PORT;
 
 namespace optp
 {
+	namespace
+	{
+		/**
+		 * @brief Resolve the plain address string into parts.
+		 *
+		 * Break-down the address and split it into two parts:
+		 *  - IP address
+		 *  - Port number
+		 * @param address the address to be resolved
+		 * @return a touple of resolved values
+		 */
+		std::tuple<std::string, std::string> breakdown_address(std::string address)
+		{
+			size_t colon_position = address.find_first_of(':');
+			std::string port_string = address.substr(colon_position + 1);
+			std::string ip_string = address.substr(0, colon_position);
+			return std::make_tuple(ip_string, port_string);
+		}
+	}
+
 	optp::optp(std::string const& config_file_path, interfaces::node_shptr node)
 		: cm_maxConnectionCount(0)
 		, m_configuration(optp_config::parse(config_file_path))
@@ -33,6 +55,7 @@ namespace optp
 	{
 		object_metatypes::object_ctor_mapping_generator::generate();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
+		initializeSupportedOperations();
 		startServer();
 		connectToServer();
 	}
@@ -44,6 +67,7 @@ namespace optp
 		object_metatypes::object_ctor_mapping_generator::generate();
 		m_thisNode = std::move(std::make_shared<real_node>(weak_from_this()));
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
+		initializeSupportedOperations();
 		startServer();
 		connectToServer();
 	}
@@ -52,6 +76,11 @@ namespace optp
 	{
 		// Disconnect from all connections
 		// Cleanup
+	}
+
+	void optp::initializeSupportedOperations() const
+	{
+		m_thisNode->registerAnOperationType<operations::node_uuid_getter_operation>();
 	}
 
 	interfaces::node_wptr optp::thisNode() const
@@ -197,7 +226,10 @@ namespace optp
 				char buffer[1024];
 				size_t read_bytes;
 
-				interfaces::node_def_shptr def = std::move(std::make_shared<node_def>(peer_address.to_string()));
+				std::string ip_address;
+				std::tie(ip_address, std::ignore) = breakdown_address(peer_address.to_string());
+
+				interfaces::node_def_shptr def = std::move(std::make_shared<node_def>(ip_address));
 				while ((read_bytes = peer_socket.read(buffer, sizeof(buffer))) > 0)
 				{
 					std::string message(buffer, read_bytes);

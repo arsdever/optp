@@ -30,6 +30,5 @@ namespace optp
 		interfaces::optp_wptr m_protocol;
 		std::list<interfaces::node_shptr> m_remoteNodes;
 		interfaces::node_def_shptr m_definition;
-		std::unordered_map<int, interfaces::operation_handler_shptr> m_handlersMap;
 	};
 }

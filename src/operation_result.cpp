@@ -33,11 +33,21 @@ namespace optp
 
 	std::ostream& operation_result::serialize(std::ostream& stm) const
 	{
-		return object::serialize(stm);
+		return object::serialize(stm) << m_data;
 	}
 
 	std::istream& operation_result::deserialize(std::istream& stm)
 	{
-		return object::deserialize(stm);
+		return object::deserialize(stm) >> m_data;
+	}
+
+	void operation_result::setResultData(nlohmann::json const& data)
+	{
+		m_data = data;
+	}
+
+	nlohmann::json operation_result::data() const
+	{
+		return m_data;
 	}
 }

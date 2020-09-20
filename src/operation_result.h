@@ -12,6 +12,8 @@
 
 #include "object.h"
 
+#include <nlohmann/json.hpp>
+
 namespace optp
 {
 	class operation_result
@@ -29,6 +31,9 @@ namespace optp
 		std::ostream& serialize(std::ostream& stm) const override;
 		std::istream& deserialize(std::istream& stm) override;
 
+		void setResultData(nlohmann::json const& data);
+		nlohmann::json data() const;
+
 		int metatype() const override { return (int)object_metatypes::object_metatype::OPERATION_RESULT; }
 
 		inline static interfaces::object_shptr ctor() { return interfaces::object_shptr((interfaces::object*)new operation_result()); }
@@ -36,5 +41,6 @@ namespace optp
 	private:
 		std::string m_nodeUuid;
 		std::string m_operationUuid;
+		nlohmann::json m_data;
 	};
 }

@@ -10,13 +10,18 @@
 
 namespace optp
 {
-	void operation_handler::setHandlerNode(interfaces::node_wptr handler_node)
+	interfaces::operation_wptr operation_handler::handle(interfaces::operation_wptr op)
 	{
-		m_handlerNode = std::move(handler_node);
+		return (*this)(op);
 	}
 
-	interfaces::node_wptr operation_handler::handlerNode() const
+	void operation_handler::setHandlerNodeDef(interfaces::node_def_wptr handler_node_def)
 	{
-		return m_handlerNode;
+		m_handlerNodeDef = std::move(handler_node_def);
+	}
+
+	interfaces::node_def_wptr operation_handler::handlerNodeDef() const
+	{
+		return m_handlerNodeDef;
 	}
 }

@@ -11,21 +11,24 @@
 #include "ping_operation.h"
 #include "ping_operation_result.h"
 #include <optp/node.h>
+#include <node_def.h>
 
 namespace optp
 {
 	namespace test
 	{
-		void ping_operation_handler::handle(interfaces::operation_wptr wop)
+		interfaces::operation_wptr ping_operation_handler::operator()(interfaces::operation_wptr wop)
 		{
 			if (const std::shared_ptr<ping_operation> ping = std::static_pointer_cast<ping_operation>(wop.lock()))
 			{
-				if (const auto node_shptr = handlerNode().lock())
+				if (const node_def_shptr node_shptr = std::dynamic_pointer_cast<node_def>(handlerNodeDef().lock()))
 				{
-					interfaces::operation_result_shptr result = std::make_shared<ping_operation_result>(std::dynamic_pointer_cast<object>(node_shptr)->uuid(), ping->uuid());
+					interfaces::operation_result_shptr result = std::make_shared<ping_operation_result>(node_shptr->uuid(), ping->uuid());
 					ping->setResult(result);
 				}
 			}
+
+			return wop;
 		}
 	}
 }

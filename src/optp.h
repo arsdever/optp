@@ -35,6 +35,7 @@ namespace optp
 		~optp();
 
 		interfaces::node_wptr thisNode() const;
+		void initializeSupportedOperations() const;
 
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation);
 		interfaces::operation_shptr handle(interfaces::operation_shptr operation);

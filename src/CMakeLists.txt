@@ -86,3 +86,5 @@ generate_export_header(${PROJECT_NAME}
 	EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/${PROJECT_NAME}_export.h
 )
 # === Generate export headers ==================================================
+
+add_subdirectory(operations)
