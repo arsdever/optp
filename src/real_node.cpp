@@ -13,6 +13,7 @@
 #include <optp/optp.h>
 #include <optp/operation.h>
 #include <optp/operation_handler.h>
+#include "operation_result.h"
 
 namespace optp
 {
@@ -31,20 +32,24 @@ namespace optp
 	{
 		if (interfaces::optp_shptr protocol = m_protocol.lock())
 		{
-			return protocol->handle(operation);
+			return protocol->execute(operation);
 		}
 
-		return handle(operation);
+		operation->setResult(handle(operation));
+		return operation;
 	}
 
-	interfaces::operation_shptr real_node::handle(interfaces::operation_shptr operation)
+	interfaces::operation_result_shptr real_node::handle(interfaces::operation_shptr operation)
 	{
 		auto handler_iterator = m_handlersMap.find(operation->type());
 		if (handler_iterator != m_handlersMap.end() && handler_iterator->second != nullptr)
 		{
 			handler_iterator->second->handle(operation);
 		}
-		return operation;
+		
+		return std::make_shared<operation_result>(
+			std::dynamic_pointer_cast<interfaces::object>(getDefinition().lock())->uuid(),
+			std::dynamic_pointer_cast<interfaces::object>(operation)->uuid());
 	}
 
 	interfaces::node_def_wptr real_node::getDefinition() const

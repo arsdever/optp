@@ -22,7 +22,7 @@ namespace optp
 
 			virtual std::string address() const = 0;
 			virtual operation_shptr execute(interfaces::operation_shptr operation) = 0;
-			virtual operation_shptr handle(interfaces::operation_shptr operation) = 0;
+			virtual operation_result_shptr handle(interfaces::operation_shptr operation) = 0;
 			virtual node_def_wptr getDefinition() const = 0;
 
 			template <typename T>

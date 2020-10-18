@@ -23,7 +23,7 @@ namespace optp
 
 			virtual node_wptr thisNode() const = 0;
 			virtual operation_shptr execute(operation_shptr operation) = 0;
-			virtual operation_shptr handle(operation_shptr operation) = 0;
+			virtual operation_result_shptr handle(operation_shptr operation) = 0;
 			virtual void connectToNode(std::string const& ip_address) = 0;
 			virtual void disconnectFromNode(node_def_wptr const& node_def) = 0;
 			virtual void disconnectFromNode(node_wptr const& node_def) = 0;

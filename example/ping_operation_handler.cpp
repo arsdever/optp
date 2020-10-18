@@ -17,18 +17,13 @@ namespace optp
 {
 	namespace test
 	{
-		interfaces::operation_wptr ping_operation_handler::operator()(interfaces::operation_wptr wop)
+		interfaces::operation_result_shptr ping_operation_handler::operator()(interfaces::operation_wptr wop)
 		{
-			if (const std::shared_ptr<ping_operation> ping = std::static_pointer_cast<ping_operation>(wop.lock()))
-			{
-				if (const node_def_shptr node_shptr = std::dynamic_pointer_cast<node_def>(handlerNodeDef().lock()))
-				{
-					interfaces::operation_result_shptr result = std::make_shared<ping_operation_result>(node_shptr->uuid(), ping->uuid());
-					ping->setResult(result);
-				}
-			}
-
-			return wop;
+			const std::shared_ptr<ping_operation> ping = std::static_pointer_cast<ping_operation>(wop.lock());
+			const node_def_shptr node_shptr = std::dynamic_pointer_cast<node_def>(handlerNodeDef().lock());
+			interfaces::operation_result_shptr result = std::make_shared<ping_operation_result>(node_shptr->uuid(), ping->uuid());
+			ping->setResult(result);
+			return result;
 		}
 	}
 }

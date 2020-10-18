@@ -36,7 +36,7 @@ namespace optp
 
 		std::string address() const override;
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
-		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
+		interfaces::operation_result_shptr handle(interfaces::operation_shptr operation) override;
 		interfaces::node_def_wptr getDefinition() const override;
 
 		void set_event_handlers(event_handler_mapping const& ehm);
@@ -47,6 +47,8 @@ namespace optp
 
 	private:
 		void read_message(asio::error_code const& ec, std::size_t bytes);
+		void send_result(interfaces::operation_result_shptr result);
+		interfaces::operation_result_shptr handle_operation(interfaces::operation_shptr operation);
 
 		// Event handlers
 		void on_connected(asio::error_code const& ec, on_connection_cb_t cb);

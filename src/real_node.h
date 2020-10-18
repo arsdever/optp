@@ -21,7 +21,7 @@ namespace optp
 
 		std::string address() const override;
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation) override;
-		interfaces::operation_shptr handle(interfaces::operation_shptr operation) override;
+		interfaces::operation_result_shptr handle(interfaces::operation_shptr operation) override;
 		interfaces::node_def_wptr getDefinition() const override;
 
 		void registerOperationHandler(int operation_type, interfaces::operation_handler_shptr handler);

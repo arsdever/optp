@@ -38,7 +38,7 @@ namespace optp
 		void initializeSupportedOperations() const;
 
 		interfaces::operation_shptr execute(interfaces::operation_shptr operation);
-		interfaces::operation_shptr handle(interfaces::operation_shptr operation);
+		interfaces::operation_result_shptr handle(interfaces::operation_shptr operation);
 
 		void forEachRemote(std::function<void(interfaces::node_wptr)> function, bool skip_valid_check = true);
 		void connectToNode(std::string const& ip_address) override;

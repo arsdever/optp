@@ -17,7 +17,7 @@ namespace optp
 		class ping_operation_handler : public operation_handler
 		{
 		public:
-			interfaces::operation_wptr operator()(interfaces::operation_wptr wop) override;
+			interfaces::operation_result_shptr operator()(interfaces::operation_wptr wop) override;
 		};
 	}
 }

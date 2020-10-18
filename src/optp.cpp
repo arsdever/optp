@@ -104,7 +104,7 @@ namespace optp
 		return operation;
 	}
 
-	interfaces::operation_shptr optp::handle(interfaces::operation_shptr operation)
+	interfaces::operation_result_shptr optp::handle(interfaces::operation_shptr operation)
 	{
 		return m_thisNode->handle(operation);
 	}

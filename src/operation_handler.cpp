@@ -10,7 +10,7 @@
 
 namespace optp
 {
-	interfaces::operation_wptr operation_handler::handle(interfaces::operation_wptr op)
+	interfaces::operation_result_shptr operation_handler::handle(interfaces::operation_wptr op)
 	{
 		return (*this)(op);
 	}

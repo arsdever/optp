@@ -23,6 +23,9 @@
 #include <asio.hpp>
 #include <asio/placeholders.hpp>
 
+#include "operations/node_uuid_getter_op.h"
+#include "operation_result.h"
+
 #define SETUP_ERROR_HANDLER( errc, handler ) if ( ec == asio::error:: errc ) { handler(); return; }
 
 static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
@@ -68,10 +71,20 @@ namespace optp
 		return op;
 	}
 
-	interfaces::operation_shptr remote_node::handle(interfaces::operation_shptr op)
+	interfaces::operation_result_shptr remote_node::handle(interfaces::operation_shptr op)
 	{
 		logger->info("Handling remote operation with uuid {0}", std::static_pointer_cast<operation>(op)->uuid());
-		return op;
+
+		return std::make_shared<operation_result>(
+			std::dynamic_pointer_cast<interfaces::object>(getDefinition().lock())->uuid(),
+			std::dynamic_pointer_cast<interfaces::object>(op)->uuid());
+	}
+
+	interfaces::operation_result_shptr remote_node::handle_operation(interfaces::operation_shptr op)
+	{
+		//operation_result_shptr result = std::make_shared<operation_result>();
+
+		return handle(op);
 	}
 
 	void remote_node::startup()
@@ -112,7 +125,7 @@ namespace optp
 
 		if (optr->metatype() == (int)object_metatypes::object_metatype::OPERATION)
 		{
-			handle(std::static_pointer_cast<interfaces::operation>(optr));
+			handle(std::dynamic_pointer_cast<interfaces::operation>(optr));
 		}
 		m_socket.async_read_some(asio::buffer(m_incomingMessageBuffer, 1024), std::bind(&remote_node::read_message, this, std::placeholders::_1, std::placeholders::_2));
 	}

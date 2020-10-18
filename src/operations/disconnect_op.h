@@ -18,7 +18,7 @@ namespace optp
 			typedef class disconnect_operation_handler : public operation_handler
 			{
 			public:
-				interfaces::operation_wptr operator()(interfaces::operation_wptr operation);
+				interfaces::operation_result_shptr operator()(interfaces::operation_wptr operation);
 			} handler_type;
 
 			inline static int type_id() { return (int)operation_types::NodeUuidGetter; }
