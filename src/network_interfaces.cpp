@@ -1,138 +1,129 @@
+// Reference: https://stackoverflow.com/questions/2674314/get-local-ip-address-using-boost-asio
+
 #include "network_interfaces.h"
-#include <sockpp/inet_address.h>
-#include <sockpp/inet6_address.h>
-
-#if defined (_WIN32)
-#include <iphlpapi.h>
-#elif defined (__linux__)
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <ifaddrs.h>
-#include <arpa/inet.h>
-#endif
-
-static void collectLocalIpAddresses(std::vector<std::shared_ptr<sockpp::sock_address>>& address_list)
-{
-#if defined (_WIN32)
-#pragma comment(lib, "IPHLPAPI.lib")
-	// https://stackoverflow.com/questions/122208/get-the-ip-address-of-local-computer
-	PIP_ADAPTER_ADDRESSES adapter_addresses(NULL);
-	DWORD adapter_addresses_buffer_size = 16000;
-
-	for (int attempts = 0; attempts != 3; ++attempts)
-	{
-		adapter_addresses = (IP_ADAPTER_ADDRESSES*)malloc(adapter_addresses_buffer_size);
-
-		DWORD error = ::GetAdaptersAddresses(
-			AF_UNSPEC,
-			GAA_FLAG_SKIP_ANYCAST |
-			GAA_FLAG_SKIP_MULTICAST |
-			GAA_FLAG_SKIP_DNS_SERVER |
-			GAA_FLAG_SKIP_FRIENDLY_NAME,
-			NULL,
-			adapter_addresses,
-			&adapter_addresses_buffer_size);
-
-		if (ERROR_SUCCESS == error)
-			break;
-		else if (ERROR_BUFFER_OVERFLOW == error)
-		{
-			free(adapter_addresses);
-			adapter_addresses = NULL;
-			continue;
-		}
-		else
-		{
-			free(adapter_addresses);
-			adapter_addresses = NULL;
-			return;
-		}
-	}
-
-	for (PIP_ADAPTER_ADDRESSES adapter = adapter_addresses; adapter != NULL; adapter = adapter->Next)
-	{
-		if (IF_TYPE_SOFTWARE_LOOPBACK == adapter->IfType)
-			continue;
-
-		for (PIP_ADAPTER_UNICAST_ADDRESS address = adapter->FirstUnicastAddress; NULL != address; address = address->Next)
-		{
-			auto family = address->Address.lpSockaddr->sa_family;
-			if (AF_INET == family)
-			{
-				SOCKADDR_IN* ipv4 = reinterpret_cast<SOCKADDR_IN*>(address->Address.lpSockaddr);
-				address_list.push_back(std::make_shared<sockpp::inet_address>(*ipv4));
-			}
-			else if (AF_INET6 == family)
-			{
-				SOCKADDR_IN6* ipv6 = reinterpret_cast<SOCKADDR_IN6*>(address->Address.lpSockaddr);
-				auto addr = std::make_shared<sockpp::inet6_address>(*ipv6);
-				if (0 == addr->to_string().find("fe"))
-				{
-					char c = addr->to_string()[2];
-					if (c == '8' || c == '9' || c == 'a' || c == 'b')
-						address_list.push_back(addr);
-				}
-			}
-		}
-	}
-
-	free(adapter_addresses);
-	adapter_addresses = NULL;
-#elif defined (__linux__)
-	ifaddrs* interfaces = nullptr;
-	getifaddrs(&interfaces);
-	for (ifaddrs* ifa = interfaces; ifa != NULL; ifa = ifa->ifa_next)
-	{
-		if (!ifa->ifa_addr)
-			continue;
-
-		if (ifa->ifa_addr->sa_family == AF_INET)
-			address_list.push_back(std::make_shared<sockpp::inet_address>(*ifa->ifa_addr));
-
-		else if (ifa->ifa_addr->sa_family == AF_INET6)
-			address_list.push_back(std::make_shared<sockpp::inet6_address>(*(sockaddr_in6*)ifa->ifa_addr));
-	}
-#endif
-}
 
 namespace optp
 {
+	namespace
+	{
+		asio::ip::address_v6 sinaddr_to_asio(sockaddr_in6* addr) {
+			asio::ip::address_v6::bytes_type buf;
+			memcpy(buf.data(), addr->sin6_addr.s6_addr, sizeof(addr->sin6_addr));
+			return asio::ip::make_address_v6(buf, addr->sin6_scope_id);
+		}
+
+#if defined(_WIN32)
+#undef UNICODE
+#include <winsock2.h>
+		// Headers that need to be included after winsock2.h:
+#include <iphlpapi.h>
+#include <ws2ipdef.h>
+
+		typedef IP_ADAPTER_UNICAST_ADDRESS_LH Addr;
+		typedef IP_ADAPTER_ADDRESSES* AddrList;
+
+		std::vector<asio::ip::address> get_local_interfaces() {
+			// It's a windows machine, we assume it has 512KB free memory
+			DWORD outBufLen = 1 << 19;
+			AddrList ifaddrs = (AddrList) new char[outBufLen];
+
+			std::vector<asio::ip::address> res;
+
+			ULONG err = GetAdaptersAddresses(AF_UNSPEC,
+				GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_DNS_SERVER, NULL, ifaddrs,
+				&outBufLen);
+
+			if (err == NO_ERROR) {
+				for (AddrList addr = ifaddrs; addr != 0; addr = addr->Next) {
+					if (addr->OperStatus != IfOperStatusUp) continue;
+					// if (addr->NoMulticast) continue;
+
+					// Find the first IPv4 address
+					if (addr->Ipv4Enabled) {
+						for (Addr* uaddr = addr->FirstUnicastAddress; uaddr != 0; uaddr = uaddr->Next) {
+							if (uaddr->Address.lpSockaddr->sa_family != AF_INET) continue;
+							res.push_back(asio::ip::make_address_v4(ntohl(reinterpret_cast<sockaddr_in*>(uaddr->Address.lpSockaddr)->sin_addr.s_addr)));
+						}
+					}
+
+					if (addr->Ipv6Enabled) {
+						for (Addr* uaddr = addr->FirstUnicastAddress; uaddr != 0; uaddr = uaddr->Next) {
+							if (uaddr->Address.lpSockaddr->sa_family != AF_INET6) continue;
+							res.push_back(sinaddr_to_asio(reinterpret_cast<sockaddr_in6*>(uaddr->Address.lpSockaddr)));
+						}
+					}
+				}
+			}
+			else {
+
+			}
+			delete[]((char*)ifaddrs);
+			return res;
+		}
+#elif defined(__APPLE__) || defined(__linux__)
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <sys/types.h>
+
+		std::vector<asio::ip::address> get_local_interfaces() {
+			std::vector<asio::ip::address> res;
+			ifaddrs* ifs;
+			if (getifaddrs(&ifs)) {
+				return res;
+			}
+			for (auto addr = ifs; addr != nullptr; addr = addr->ifa_next) {
+				// No address? Skip.
+				if (addr->ifa_addr == nullptr) continue;
+
+				// Interface isn't active? Skip.
+				if (!(addr->ifa_flags & IFF_UP)) continue;
+
+				if (addr->ifa_addr->sa_family == AF_INET) {
+					res.push_back(asio::ip::make_address_v4(ntohl(
+						reinterpret_cast<sockaddr_in*>(addr->ifa_addr)->sin_addr.s_addr)));
+				}
+				else if (addr->ifa_addr->sa_family == AF_INET6) {
+					res.push_back(sinaddr_to_asio(reinterpret_cast<sockaddr_in6*>(addr->ifa_addr)));
+				}
+				else continue;
+			}
+			freeifaddrs(ifs);
+			return res;
+		}
+#else
+#error "Unsupported platform"
+#endif
+	}
+
 	network_interfaces::network_interfaces()
+		: m_localInterfaces{std::move(get_local_interfaces())}
+	{}
+
+	//bool is_local(sockpp::sock_address const& address) const;
+	bool network_interfaces::is_local(std::string const& address) const
 	{
-		collectLocalIpAddresses(m_local_interfaces);
+		return std::find_if(m_localInterfaces.cbegin(), m_localInterfaces.cend(), [&address](asio::ip::address const& interface_address) {
+			return asio::ip::make_address(address) == interface_address; }) != m_localInterfaces.cend();
 	}
 
-	bool network_interfaces::is_local(sockpp::sock_address const& address) const
+	std::vector<std::string> network_interfaces::local_addresses_string() const
 	{
-		std::string addr_str = address.to_string().substr();
-		std::string ip_str = addr_str.substr(0, addr_str.find_first_of(':'));
-		return is_local(ip_str);
+		std::vector<std::string> result;
+		for (asio::ip::address address : m_localInterfaces)
+			result.push_back(address.to_string());
+
+		return std::move(result);
 	}
 
-	bool network_interfaces::is_local(std:: string const& address) const
+	std::vector<asio::ip::address> network_interfaces::local_addresses() const
 	{
-		return std::find_if(m_local_interfaces.begin(), m_local_interfaces.end(), [&address](auto addr) -> bool {
-			std::string addr_str = addr->to_string();
-			std::string ip_str = addr_str.substr(0, addr_str.find_first_of(':'));
-			return address == ip_str;
-			}) != m_local_interfaces.end();
+		return m_localInterfaces;
 	}
 
 	network_interfaces& network_interfaces::global()
 	{
 		static network_interfaces instance;
 		return instance;
-	}
-
-	std::vector<std::string> network_interfaces::localAddresses() const
-	{
-		std::vector<std::string> result;
-		for (auto addr : m_local_interfaces)
-		{
-			std::string addr_str = addr->to_string();
-			result.push_back(addr_str);
-		}
-
-		return result;
 	}
 }

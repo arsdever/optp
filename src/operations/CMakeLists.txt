@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.6)
 project(operations VERSION 0.0.1 LANGUAGES CXX)
 
 set(UNITS
-	"node_uuid_getter_op"
+	disconnect_op
+	node_uuid_getter_op
 )
 
 foreach(UNIT ${UNITS})

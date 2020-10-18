@@ -15,7 +15,7 @@ list(APPEND CLASS_FILES
 	operation_result
 	operation_handler
 	network_interfaces
-	connection_listener
+	connector
 )
 
 set(METATYPE_LIST "operation;node_def;operation_result")
@@ -46,9 +46,9 @@ add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} "ty
 
 target_link_libraries(${PROJECT_NAME}
 PRIVATE
-	${CONAN_LIBS_SOCKPP}
-	${CONAN_SYSTEM_LIBS_SOCKPP}
-	${CONAN_LIBS_SPDLOG}
+	${CONAN_LIBS}
+	${CONAN_SYSTEM_LIBS}
+	${OTHER_LIBS}
 )
 
 target_precompile_headers(${PROJECT_NAME}
@@ -57,8 +57,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_directories(${PROJECT_NAME}
 PRIVATE
-	${CONAN_LIB_DIRS_SOCKPP}
-	${CONAN_LIB_DIRS_SPDLOG}
+	${CONAN_LIB_DIRS}
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -69,9 +68,7 @@ target_include_directories(${PROJECT_NAME}
 		$<INSTALL_INTERFACE:interface>
 	PRIVATE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-		${CONAN_INCLUDE_DIRS_SOCKPP}
-		${CONAN_INCLUDE_DIRS_SPDLOG}
-		${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}
+		${CONAN_INCLUDE_DIRS}
 )
 
 if (UNIX)

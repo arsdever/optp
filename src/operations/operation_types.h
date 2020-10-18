@@ -7,7 +7,8 @@ namespace optp
 		enum operation_types
 		{
 			Unknown = 0,
-			NodeUuidGetter
+			NodeUuidGetter,
+			Disconnect
 		};
 	}
 }

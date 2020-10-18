@@ -18,11 +18,9 @@
 
 #include <unordered_set>
 
-#include <sockpp/acceptor.h>
-
 namespace optp
 {
-	class connection_listener;
+	class connector;
 
 	class OPTP_EXPORT optp : public interfaces::optp
 	{
@@ -33,6 +31,8 @@ namespace optp
 		optp(std::string const& config_file_path, interfaces::node_shptr node);
 		optp(std::string const& config_file_path);
 		~optp();
+
+		void startup();
 
 		interfaces::node_wptr thisNode() const;
 		void initializeSupportedOperations() const;
@@ -54,10 +54,9 @@ namespace optp
 		node_list_t::const_iterator findNode(optp_config::node_def_t const& node_def) const;
 
 	private:
-		const int cm_maxConnectionCount;
 		optp_config m_configuration;
 		interfaces::node_shptr m_thisNode;
 		node_list_t m_remotes;
-		std::unique_ptr<connection_listener> m_connectionListener;
+		std::unique_ptr<connector> m_connector;
 	};
 }

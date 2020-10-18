@@ -14,6 +14,7 @@ namespace optp
 {
 	class optp;
 	class node;
+	class remote_node;
 	class object;
 	class node_def;
 	class operation;
@@ -24,6 +25,11 @@ namespace optp
 	typedef std::weak_ptr<node> node_wptr;
 	typedef node& node_ref;
 	typedef node const& node_cref;
+
+	typedef std::shared_ptr<remote_node> rnode_shptr;
+	typedef std::weak_ptr<remote_node> rnode_wptr;
+	typedef remote_node& rnode_ref;
+	typedef remote_node const& rnode_cref;
 
 	typedef std::shared_ptr<node_def> node_def_shptr;
 	typedef std::weak_ptr<node_def> node_def_wptr;

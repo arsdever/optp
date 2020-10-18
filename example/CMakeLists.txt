@@ -22,17 +22,11 @@ add_custom_command(TARGET ${EXAMPLE_NAME}
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/test_config.json" ${CMAKE_BINARY_DIR}
 )
 
-target_precompile_headers(${EXAMPLE_NAME}
-	PRIVATE ${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}/nlohmann/json.hpp
-)
-
 target_include_directories(${EXAMPLE_NAME}
 	PRIVATE ${CMAKE_SOURCE_DIR}
 		${CMAKE_SOURCE_DIR}/src
 		${CMAKE_BINARY_DIR}
-		${CONAN_INCLUDE_DIRS_SOCKPP}
-		${CONAN_INCLUDE_DIRS_SPDLOG}
-		${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}
+		${CONAN_INCLUDE_DIRS}
 )
 
 target_precompile_headers(${EXAMPLE_NAME}
@@ -45,6 +39,5 @@ target_link_libraries(${EXAMPLE_NAME}
 
 target_link_directories(${EXAMPLE_NAME}
 PRIVATE
-	${CONAN_LIB_DIRS_SOCKPP}
-	${CONAN_LIB_DIRS_SPDLOG}
+	${CONAN_LIB_DIRS}
 )

@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 		});
 	interpreter.registerCallback("ip", [&protocol](std::istream& stream) {
 		std::cout << "Local ip addresses are" << std::endl;
-		std::vector<std::string> local_ip_addresses = optp::network_interfaces::global().localAddresses();
+		std::vector<std::string> local_ip_addresses = optp::network_interfaces::global().local_addresses_string();
 		for (std::string addr : local_ip_addresses)
 		{
 			std::cout << '\t' << addr << std::endl;

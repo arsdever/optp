@@ -4,13 +4,14 @@ set(PROJECT_NAME optp)
 project(${PROJECT_NAME} VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
+#set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 
 option(CONAN_REFERENCE "Set the conan reference username/tag pair")
 option(CONAN_PROFILE "Set the conan profile")
 
 if(WIN32)
 	message("Building for windows")
+	set(OTHER_LIBS Iphlpapi)
 else()
 	message("Building for other platforms")
 	set(OTHER_LIBS pthread)

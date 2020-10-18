@@ -1,5 +1,5 @@
 [requires]
-    sockpp/0.7@arsdever/stable
+    asio/1.18.0
     nlohmann_json/3.7.3@arsdever/stable
     spdlog/1.6.1@arsdever/stable
 

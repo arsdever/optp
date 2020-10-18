@@ -10,7 +10,6 @@
 #pragma once
 
 #include <optp_export.h>
-#include <sockpp/sock_address.h>
 
 #include <vector>
 
@@ -20,13 +19,13 @@ namespace optp
 	{
 	public:
 		network_interfaces();
-		bool is_local(sockpp::sock_address const& address) const;
 		bool is_local(std::string const& address) const;
-		std::vector<std::string> localAddresses() const;
+		std::vector<std::string> local_addresses_string() const;
+		std::vector<asio::ip::address> local_addresses() const;
 
 		static network_interfaces& global();
 
 	private:
-		std::vector<std::shared_ptr<sockpp::sock_address>> m_local_interfaces;
+		std::vector<asio::ip::address> m_localInterfaces;
 	};
 }
