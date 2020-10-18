@@ -25,5 +25,14 @@ namespace optp
 		{
 			@OBJECT_METATYPES_UPPER_LIST@
 		};
+
+		constexpr char const* object_metatype_name(object_metatype type)
+		{
+			switch (type)
+			{
+			@OBJECT_METATYPES_NAME_MAPPING@
+			default: return "";
+			}
+		}
 	}
 }

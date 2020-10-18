@@ -103,13 +103,17 @@ namespace optp
 			return;
 		}
 
-		int type_id;
 		std::istringstream strm(m_incomingMessageBuffer);
-		strm >> type_id;
+		int type_id = std::stoi(std::string(m_incomingMessageBuffer, 5));
 		interfaces::deserializable_shptr ptr = std::dynamic_pointer_cast<interfaces::deserializable>(object_metatypes::object_ctor_mapping::map[type_id]());
 		ptr->deserialize(strm);
 		interfaces::object_shptr optr = std::dynamic_pointer_cast<interfaces::object>(ptr);
-		logger->info("Remote operation received with uuid {0}", optr->uuid());
+		logger->info("Remote object \"{}\" received with uuid {}", object_metatypes::object_metatype_name((object_metatypes::object_metatype)optr->metatype()), optr->uuid());
+
+		if (optr->metatype() == (int)object_metatypes::object_metatype::OPERATION)
+		{
+			handle(std::static_pointer_cast<interfaces::operation>(optr));
+		}
 		m_socket.async_read_some(asio::buffer(m_incomingMessageBuffer, 1024), std::bind(&remote_node::read_message, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
@@ -155,9 +159,8 @@ namespace optp
 
 	void remote_node::handshake()
 	{
-		std::string serialized;
-		std::stringstream strm(serialized);
+		std::stringstream strm;
 		std::dynamic_pointer_cast<node_def>(m_definition)->serialize(strm);
-		m_socket.write_some(asio::buffer(serialized));
+		m_socket.write_some(asio::buffer(strm.str()));
 	}
 }
