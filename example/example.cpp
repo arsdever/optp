@@ -86,7 +86,10 @@ int main(int argc, char** argv)
 		});
 	interpreter.registerCallback("remotes", [&protocol](std::istream& stream) {
 		protocol->forEachRemote([](optp::interfaces::node_wptr node) {
-			if (optp::interfaces::node_shptr shnode = node.lock()) std::cout << shnode->address() << std::endl; });
+			if (optp::interfaces::node_shptr shnode = node.lock())
+				if (optp::interfaces::object_shptr nodedef = std::dynamic_pointer_cast<optp::interfaces::object>(shnode->getDefinition().lock()))
+					std::cout << nodedef->uuid() << " " << shnode->address() << std::endl;
+			});
 		});
 	interpreter.registerCallback("getUuid", [&protocol](std::istream& stream) {
 			optp::interfaces::operation_shptr operation = std::make_shared<optp::operations::node_uuid_getter_operation>();
