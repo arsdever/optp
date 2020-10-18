@@ -31,7 +31,7 @@ namespace optp
 		};
 
 	public:
-		remote_node(/*interfaces::optp_wptr protocol, */asio::ip::tcp::socket socket, interfaces::node_def_shptr def = nullptr);
+		remote_node(asio::ip::tcp::socket socket, interfaces::node_def_shptr def = nullptr);
 		~remote_node();
 
 		std::string address() const override;
@@ -43,9 +43,9 @@ namespace optp
 
 		void handshake();
 		void connect(on_connection_cb_t cb);
+		void startup();
 
 	private:
-		void startup();
 		void read_message(asio::error_code const& ec, std::size_t bytes);
 
 		// Event handlers
@@ -55,7 +55,6 @@ namespace optp
 
 	private:
 		asio::ip::tcp::socket m_socket;
-		//interfaces::optp_wptr m_protocol;
 		interfaces::node_def_shptr m_definition;
 		std::string m_address;
 		bool m_aboutToDisconnect;

@@ -23,36 +23,26 @@
 #include <asio.hpp>
 #include <asio/placeholders.hpp>
 
-//#include <sockpp/tcp_socket.h>
+#define SETUP_ERROR_HANDLER( errc, handler ) if ( ec == asio::error:: errc ) { handler(); return; }
 
 static auto sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 static auto logger = std::make_shared<spdlog::logger>("remote_node", sink);
 
 namespace optp
 {
-	remote_node::remote_node(/*interfaces::optp_wptr protocol, */asio::ip::tcp::socket remote_socket, interfaces::node_def_shptr def)
+	remote_node::remote_node(asio::ip::tcp::socket remote_socket, interfaces::node_def_shptr def)
 		: m_socket(std::move(remote_socket))
-		//, m_protocol(protocol)
 		, m_definition(def)
 		, m_address(def->address())
 		, m_eventHandlers{}
 	{
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
-		startup();
 	}
 
 	remote_node::~remote_node()
 	{
-		//logger->info("Closing the remote socket");
-		//// Close the socket
-		//m_remoteSocket.shutdown();
-		//m_remoteSocket.close();
-		//m_remoteSocket.destroy();
-
-		//logger->info("Stopping the listener thread");
-		//// Stop the listener loop
-
-		//logger->info("Removing the remote_node associated with ip {0}", address());
+		m_socket.close();
+		m_socket.release();
 	}
 
 	std::string remote_node::address() const
@@ -87,29 +77,6 @@ namespace optp
 	void remote_node::startup()
 	{
 		m_socket.async_read_some(asio::buffer(m_incomingMessageBuffer, 1024), std::bind(&remote_node::read_message, this, std::placeholders::_1, std::placeholders::_2));
-
-		//while (!m_aboutToDisconnect && (read_bytes = m_remoteSocket.read(buffer, sizeof(buffer))) > 0)
-		//{
-		//	std::string message(buffer, read_bytes);
-		//	logger->info("Incoming message\n\tFrom node:\n\t\tNode UUID: {0}\n\t\tNode address: {1}\n\t\tMessage: {2}",
-		//		std::dynamic_pointer_cast<interfaces::object>(m_definition)->uuid(),
-		//		address(),
-		//		message);
-		//	std::istringstream strm(message);
-		//	std::istringstream type_id_stream(message.substr(0, 5));
-
-		//	int type_id;
-		//	type_id_stream >> type_id;
-		//	interfaces::deserializable_shptr ptr = std::dynamic_pointer_cast<interfaces::deserializable>(object_metatypes::object_ctor_mapping::map[type_id]());
-
-		//	ptr->deserialize(strm);
-		//	interfaces::object_shptr optr = std::dynamic_pointer_cast<interfaces::object>(ptr);
-		//	logger->info("Remote operation received with uuid {0}", optr->uuid());
-		//	//handle(optr);
-		//}
-
-		//logger->info("Remote node disconnected {0}", address());
-		//m_protocol.lock()->disconnectFromNode(shared_from_this());
 	}
 
 	void remote_node::set_event_handlers(event_handler_mapping const& ehm)
@@ -121,25 +88,17 @@ namespace optp
 	{
 		if (ec)
 		{
-			if (ec == asio::error::eof)
-			{
-				on_disconnect();
-				return;
-			}
+			SETUP_ERROR_HANDLER(eof, on_disconnect)
+			SETUP_ERROR_HANDLER(connection_reset, on_connection_reset)
 
-			if (ec == asio::error::connection_reset)
-			{
-				on_connection_reset();
-				return;
-			}
-
-			logger->error("Failed to read the message: {}", ec.message());
-			//asio::async_read(m_socket, asio::buffer(data, 1024), std::bind(&remote_node::read_message, this, std::placeholders::_1, std::placeholders::_2, std::move(data)));
-			return;
+			logger->error("Failed to read the message [{}]: {}", ec.value(), ec.message());
 		}
 
-		if (bytes == 0)
+		if (!bytes || ec)
 		{
+			if (!bytes)
+				logger->error("An empty message was read");
+
 			m_socket.async_read_some(asio::buffer(m_incomingMessageBuffer, 1024), std::bind(&remote_node::read_message, this, std::placeholders::_1, std::placeholders::_2));
 			return;
 		}
@@ -173,18 +132,6 @@ namespace optp
 
 		logger->info("Successfully connected to remote");
 		startup();
-		/*std::string buffer;
-		asio::error_code error;
-		socket.read_some(asio::buffer(buffer), error);
-		if (error)
-		{
-			logger->error("Couldn't read from remote");
-			return;
-		}
-
-		node_def_shptr def = std::make_shared<node_def>(socket.remote_endpoint().address().to_string());
-		rnode_shptr remote = std::make_shared<remote_node>(std::move(socket), std::move(def));
-		cb(std::move(remote));*/
 	}
 
 	void remote_node::on_disconnect()
@@ -208,6 +155,9 @@ namespace optp
 
 	void remote_node::handshake()
 	{
-		m_socket.write_some(asio::buffer(std::dynamic_pointer_cast<interfaces::object>(m_definition)->uuid()));
+		std::string serialized;
+		std::stringstream strm(serialized);
+		std::dynamic_pointer_cast<node_def>(m_definition)->serialize(strm);
+		m_socket.write_some(asio::buffer(serialized));
 	}
 }

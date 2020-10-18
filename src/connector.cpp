@@ -72,7 +72,7 @@ namespace optp
 		logger->info("Successfully connected to remote");
 		node_def_shptr def = std::make_shared<node_def>("127.0.0.1");
 		rnode_shptr remote = std::make_shared<remote_node>(std::move(peer), std::move(def));
-		remote->handshake();
+		remote->startup();
 		m_onConnectionCB(std::move(remote));
 	}
 
