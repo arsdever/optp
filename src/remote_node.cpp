@@ -45,7 +45,6 @@ namespace optp
 	remote_node::~remote_node()
 	{
 		m_socket.close();
-		m_socket.release();
 	}
 
 	std::string remote_node::address() const
@@ -105,9 +104,11 @@ namespace optp
 			SETUP_ERROR_HANDLER(connection_reset, on_connection_reset)
 
 			logger->error("Failed to read the message [{}]: {}", ec.value(), ec.message());
+			m_socket.close();
+			return;
 		}
 
-		if (!bytes || ec)
+		if (!bytes)
 		{
 			if (!bytes)
 				logger->error("An empty message was read");
@@ -148,7 +149,10 @@ namespace optp
 		}
 
 		logger->info("Successfully connected to remote");
-		startup();
+		if (handshake() && receive_handshake())
+			startup();
+
+		cb(shared_from_this());
 	}
 
 	void remote_node::on_disconnect()
@@ -170,10 +174,61 @@ namespace optp
 		return m_definition;
 	}
 
-	void remote_node::handshake()
+	bool remote_node::handshake()
 	{
-		std::stringstream strm;
-		std::dynamic_pointer_cast<node_def>(m_definition)->serialize(strm);
-		m_socket.write_some(asio::buffer(strm.str()));
+		if (interfaces::optp_shptr shproto = m_protocol.lock())
+		{
+			if (interfaces::node_shptr thisnode = shproto->thisNode().lock())
+			{
+				if (interfaces::node_def_shptr thisnodedef = thisnode->getDefinition().lock())
+				{
+					std::stringstream strm;
+					std::dynamic_pointer_cast<node_def>(thisnodedef)->serialize(strm);
+					m_socket.write_some(asio::buffer(strm.str()));
+					return true;
+				}
+				else
+				{
+					logger->warn("The current real node instance is missing it's definition");
+					m_socket.close();
+					return false;
+				}
+			}
+			else
+			{
+				logger->warn("Protocol has not configured properly: The current node instance is missing");
+				m_socket.close();
+				return false;
+			}
+		}
+		else
+		{
+			logger->warn("Protocol is not valid");
+			m_socket.close();
+			return false;
+		}
+	}
+
+	bool remote_node::receive_handshake()
+	{
+		std::string buffer(128, '\0');
+		asio::error_code error;
+		m_socket.read_some(asio::buffer(buffer), error);
+		if (error)
+		{
+			logger->error("Failed to receive the handshake [{}]: {}", error.value(), error.message());
+			m_socket.close();
+			return false;
+		}
+
+		interfaces::deserializable_shptr des = std::dynamic_pointer_cast<interfaces::deserializable>(m_definition);
+		std::stringstream bufstm(buffer);
+		des->deserialize(bufstm);
+		return true;
+	}
+	
+	void remote_node::set_protocol(interfaces::optp_wptr proto)
+	{
+		m_protocol = proto;
 	}
 }

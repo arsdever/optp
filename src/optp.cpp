@@ -54,8 +54,6 @@ namespace optp
 		object_metatypes::object_ctor_mapping_generator::generate();
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		initializeSupportedOperations();
-		startServer();
-		connectToServer();
 	}
 
 	optp::optp(std::string const& config_file_path)
@@ -65,14 +63,18 @@ namespace optp
 		m_thisNode = std::move(std::make_shared<real_node>(weak_from_this()));
 		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		initializeSupportedOperations();
-		startServer();
-		connectToServer();
 	}
 
 	optp::~optp()
 	{
 		// Disconnect from all connections
 		// Cleanup
+	}
+
+	void optp::startup()
+	{
+		startServer();
+		connectToServer();
 	}
 
 	void optp::initializeSupportedOperations() const
@@ -160,22 +162,9 @@ namespace optp
 			std::shared_ptr<remote_node> rnode = std::make_shared<remote_node>(weak_from_this(), std::move(remote_socket), std::move(def));
 				m_remotes.insert(rnode);*/
 		//}
-		interfaces::node_shptr node = m_connector->connect_to(node_address/*, [&remotes = this->m_remotes](interfaces::node_shptr node) {
+		m_connector->connect_to(node_address, [&remotes = this->m_remotes](interfaces::node_shptr node) {
 				remotes.insert(node);
-			}*/);
-		m_remotes.insert(node);
-		rnode_shptr rnode = std::dynamic_pointer_cast<remote_node>(node);
-		if (rnode)
-		{
-			rnode->set_event_handlers(remote_node::event_handler_mapping{}.on_disconnect([&remotes = m_remotes](interfaces::node_wptr wnode) {
-				if (interfaces::node_shptr shnode = wnode.lock())
-				{
-					std::string uuid = std::dynamic_pointer_cast<interfaces::object>(shnode->getDefinition().lock())->uuid();
-					remotes.erase(shnode);
-					logger->info("Node {} was removed from remotes list", uuid);
-				}
-				}));
-		}
+			});
 	}
 
 	void optp::disconnectFromNode(interfaces::node_wptr const& node_def)
@@ -220,7 +209,16 @@ namespace optp
 
 	bool optp::startServer()
 	{
-		m_connector = std::make_unique<connector>();
+		m_connector = std::make_unique<connector>(weak_from_this());
+		m_connector->set_event_handler_mapping(remote_node::event_handler_mapping{}.on_disconnect([&remotes = m_remotes](interfaces::node_wptr wnode) {
+			if (interfaces::node_shptr shnode = wnode.lock())
+			{
+				std::string uuid = std::dynamic_pointer_cast<interfaces::object>(shnode->getDefinition().lock())->uuid();
+				remotes.erase(shnode);
+				logger->info("Node {} was removed from remotes list", uuid);
+			}
+			})
+		);
 		m_connector->start();
 		m_connector->register_on_connection([&remotes = this->m_remotes](interfaces::node_shptr node) {
 			remotes.insert(node);

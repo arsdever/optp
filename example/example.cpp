@@ -53,6 +53,7 @@ int main(int argc, char** argv)
 			std::cout << "Using configuration\n|== Config begin ==|\n" << content << "\n|== Config end ==|" << std::endl;
 		}
 		protocol = std::make_unique<optp::optp>(path);
+		protocol->startup();
 		});
 	interpreter.registerCallback("connect", [&protocol](std::istream& stream) {
 		std::string address;

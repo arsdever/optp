@@ -14,9 +14,9 @@ extern const int OPTP_DEFAULT_PORT = 33000; // TODO: must be configurable
 
 namespace optp
 {
-	connector::connector()
-		//: m_serverSocket{ std::move(sockpp::tcp_acceptor(OPTP_DEFAULT_PORT, 10)) }
-		: m_startupTimestamp(std::chrono::system_clock::now().time_since_epoch().count())
+	connector::connector(interfaces::optp_wptr protocol)
+		: m_protocol{ protocol }
+		, m_startupTimestamp(std::chrono::system_clock::now().time_since_epoch().count())
 		, m_server(m_asioContext, { asio::ip::tcp::v4(), 50000 })
 		//, m_listenerThread{ &connection_listener::loop, this }
 		, alive{ true }
@@ -69,19 +69,35 @@ namespace optp
 			return;
 		}
 
-		logger->info("Successfully connected to remote");
+		logger->info("Remote peer connected successfully");
 		node_def_shptr def = std::make_shared<node_def>("127.0.0.1");
-		rnode_shptr remote = std::make_shared<remote_node>(std::move(peer), std::move(def));
-		remote->startup();
-		m_onConnectionCB(std::move(remote));
+		rnode_shptr rnode = std::make_shared<remote_node>(std::move(peer), std::move(def));
+		rnode->set_protocol(m_protocol);
+		rnode->set_event_handlers(m_eventHandlerMapping);
+		if (rnode->receive_handshake() && rnode->handshake())
+		{
+			rnode->startup();
+			m_onConnectionCB(std::move(rnode));
+		}
 	}
 
-	interfaces::node_shptr connector::connect_to(std::string const& address)
+	void connector::connect_to(std::string const& address, on_connection_cb_t connectedCB)
 	{
 		asio::ip::tcp::socket skt(m_asioContext);
 		rnode_shptr rnode = std::make_shared<remote_node>(std::move(skt), std::make_shared<node_def>(address));
-		rnode->connect([](interfaces::node_shptr) {});
-		return rnode;
+		m_pendingConnections.insert(rnode);
+		rnode->set_event_handlers(m_eventHandlerMapping);
+		rnode->set_protocol(m_protocol);
+		rnode->connect([&pendingList = m_pendingConnections, connectedCB](interfaces::node_shptr node)
+			{
+				pendingList.erase(node);
+				connectedCB(node);
+			});
+	}
+
+	void connector::set_event_handler_mapping(remote_node::event_handler_mapping ehm)
+	{
+		m_eventHandlerMapping = ehm;
 	}
 
 	void connector::on_connected(asio::error_code const& ec, asio::ip::tcp::socket socket, on_connection_cb_t cb)

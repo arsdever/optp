@@ -13,6 +13,7 @@
 #else
 #include <optp/object_metatypes.h>
 #include <optp/typedefs.h>
+#define UUID_SIZE 64
 
 namespace optp
 {

@@ -39,9 +39,12 @@ namespace optp
 		interfaces::operation_result_shptr handle(interfaces::operation_shptr operation) override;
 		interfaces::node_def_wptr getDefinition() const override;
 
+		void set_protocol(interfaces::optp_wptr proto);
+
 		void set_event_handlers(event_handler_mapping const& ehm);
 
-		void handshake();
+		bool handshake();
+		bool receive_handshake();
 		void connect(on_connection_cb_t cb);
 		void startup();
 
@@ -58,6 +61,7 @@ namespace optp
 	private:
 		asio::ip::tcp::socket m_socket;
 		interfaces::node_def_shptr m_definition;
+		interfaces::optp_wptr m_protocol;
 		std::string m_address;
 		bool m_aboutToDisconnect;
 		char m_incomingMessageBuffer[1024];

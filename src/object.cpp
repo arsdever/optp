@@ -23,7 +23,7 @@ namespace optp
 	}
 
 	object::object()
-		: __uuid(uuid_provider().provideRandomString(64))
+		: __uuid(uuid_provider().provideRandomString(UUID_SIZE))
 	{}
 
 	std::ostream& object::serialize(std::ostream& stm) const
