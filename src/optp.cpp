@@ -52,7 +52,6 @@ namespace optp
 		, m_thisNode(node)
 	{
 		object_metatypes::object_ctor_mapping_generator::generate();
-		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		initializeSupportedOperations();
 	}
 
@@ -61,7 +60,6 @@ namespace optp
 	{
 		object_metatypes::object_ctor_mapping_generator::generate();
 		m_thisNode = std::move(std::make_shared<real_node>(weak_from_this()));
-		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		initializeSupportedOperations();
 	}
 

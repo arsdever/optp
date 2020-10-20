@@ -21,7 +21,6 @@ namespace optp
 {
 	optp_config::optp_config(std::string const& file_path)
 	{
-		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 		std::ifstream istm(file_path);
 		if (!istm)
 		{

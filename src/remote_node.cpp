@@ -39,7 +39,6 @@ namespace optp
 		, m_address(def->address())
 		, m_eventHandlers{}
 	{
-		logger->set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] [thread %t] %v");
 	}
 
 	remote_node::~remote_node()
