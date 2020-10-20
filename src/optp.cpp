@@ -209,15 +209,20 @@ namespace optp
 
 	bool optp::startServer()
 	{
-		m_connector = std::make_unique<connector>(weak_from_this());
-		m_connector->set_event_handler_mapping(remote_node::event_handler_mapping{}.on_disconnect([&remotes = m_remotes](interfaces::node_wptr wnode) {
+		std::function<void(interfaces::node_wptr)> removeNode = [&remotes = m_remotes](interfaces::node_wptr wnode) {
 			if (interfaces::node_shptr shnode = wnode.lock())
 			{
 				std::string uuid = std::dynamic_pointer_cast<interfaces::object>(shnode->getDefinition().lock())->uuid();
 				remotes.erase(shnode);
 				logger->info("Node {} was removed from remotes list", uuid);
 			}
-			})
+		};
+
+		m_connector = std::make_unique<connector>(weak_from_this());
+		m_connector->set_event_handler_mapping(
+			remote_node::event_handler_mapping{}
+				.on_disconnect(removeNode)
+				.on_connection_reset(removeNode)
 		);
 		m_connector->start();
 		m_connector->register_on_connection([&remotes = this->m_remotes](interfaces::node_shptr node) {
