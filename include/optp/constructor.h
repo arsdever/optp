@@ -6,7 +6,7 @@
 
 namespace ctor
 {
-	// ===| ! |=| Derived class must have public default constructor        ===| //
+	// ===| ! |=| Derived class must have a public default constructor      ===| //
 	// ===| i |=| In case the interface is disabled, the user has to have a ===| //
 	//            <code>static void* ctor()</code> method in the class      ===| //
 
