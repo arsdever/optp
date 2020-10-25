@@ -9,8 +9,6 @@
 
 #include "optp_config.h"
 
-#include <fstream>
-
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 
@@ -24,7 +22,9 @@ namespace optp
 		std::ifstream istm(file_path);
 		if (!istm)
 		{
-			logger->error("Could not open file {0}: {1}", file_path, strerror(errno));
+			char* error_msg = new char[1024];
+			strerror_s(error_msg, 1024, errno);
+			logger->error("Could not open file {0}: {1}", file_path, error_msg);
 			return;
 		}
 

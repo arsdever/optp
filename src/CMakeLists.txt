@@ -44,7 +44,7 @@ file(GLOB INTERFACE_FOLDER "${CMAKE_SOURCE_DIR}/include/optp/*")
 source_group("Interfaces" FILES ${INTERFACE_FOLDER})
 list(APPEND HEADER_FILES_LIST ${INTERFACE_FOLDER})
 
-add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} "typedefs.h" "pch.h")
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES_LIST} ${HEADER_FILES_LIST} "typedefs.h" "optp_pch.h")
 
 target_link_libraries(${PROJECT_NAME}
 PRIVATE
@@ -53,9 +53,7 @@ PRIVATE
 	${OTHER_LIBS}
 )
 
-target_precompile_headers(${PROJECT_NAME}
-	PRIVATE pch.h
-)
+target_precompile_headers(${PROJECT_NAME} PUBLIC optp_pch.h)
 
 target_link_directories(${PROJECT_NAME}
 PRIVATE
@@ -63,20 +61,21 @@ PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME}
-	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/exports>
-		$<INSTALL_INTERFACE:interface>
-	PRIVATE
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-		${CONAN_INCLUDE_DIRS}
+PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/exports>
+	$<INSTALL_INTERFACE:interface>
+PRIVATE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+	${CONAN_INCLUDE_DIRS}
 )
 
 if (UNIX)
-target_link_libraries(${PROJECT_NAME}
-	PUBLIC pthread
-)
+	target_link_libraries(${PROJECT_NAME}
+	PUBLIC
+		pthread
+	)
 endif()
 # === Generate export headers ==================================================
 include(GenerateExportHeader)

@@ -11,8 +11,6 @@
 
 #include <optp_export.h>
 
-#include <vector>
-
 namespace optp
 {
 	class OPTP_EXPORT network_interfaces

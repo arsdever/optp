@@ -41,4 +41,14 @@ namespace optp
 		object::deserialize(stm);
 		return stm;
 	}
+
+	interfaces::node_group node_def::group() const
+	{
+		return m_nodeGroup;
+	}
+
+	void node_def::set_group(interfaces::node_group group)
+	{
+		m_nodeGroup = group;
+	}
 }

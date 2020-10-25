@@ -14,15 +14,6 @@
 
 #include <optp/optp.h>
 
-#include <thread>
-#include <sstream>
-
-#include <spdlog/spdlog.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/ansicolor_sink.h>
-#include <asio.hpp>
-#include <asio/placeholders.hpp>
-
 #include "operations/node_uuid_getter_op.h"
 #include "operation_result.h"
 
@@ -220,6 +211,7 @@ namespace optp
 			return false;
 		}
 
+		buffer = buffer.substr(5);
 		interfaces::deserializable_shptr des = std::dynamic_pointer_cast<interfaces::deserializable>(m_definition);
 		std::stringstream bufstm(buffer);
 		des->deserialize(bufstm);

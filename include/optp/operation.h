@@ -13,7 +13,6 @@
 #include <optp/serializable.h>
 #include <optp/deserializable.h>
 #include <optp/object.h>
-#include <list>
 
 namespace optp
 {

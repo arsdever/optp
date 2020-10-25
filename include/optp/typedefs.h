@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <memory>
-
 namespace optp
 {
 	namespace interfaces

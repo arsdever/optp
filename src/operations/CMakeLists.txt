@@ -19,3 +19,7 @@ target_include_directories(operations PUBLIC
 	${CMAKE_BINARY_DIR}/exports
 	${CONAN_INCLUDE_DIRS_NLOHMANN_JSON}
 )
+
+target_precompile_headers(operations
+	REUSE_FROM optp
+)

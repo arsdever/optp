@@ -10,7 +10,6 @@
 #pragma once
 
 #include <optp_export.h>
-#include <string>
 
 namespace optp
 {

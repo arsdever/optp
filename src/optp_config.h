@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-
 #include <optp_export.h>
 
 namespace optp

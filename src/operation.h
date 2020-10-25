@@ -10,8 +10,6 @@
 #pragma once
 
 #include <optp/operation.h>
-#include <unordered_map>
-
 #include <optp_export.h>
 
 #include "object.h"

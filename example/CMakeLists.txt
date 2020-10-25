@@ -30,7 +30,7 @@ target_include_directories(${EXAMPLE_NAME}
 )
 
 target_precompile_headers(${EXAMPLE_NAME}
-	PRIVATE ../src/pch.h
+	REUSE_FROM optp
 )
 
 target_link_libraries(${EXAMPLE_NAME}

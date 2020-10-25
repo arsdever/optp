@@ -16,8 +16,6 @@
 #include <optp/optp.h>
 #include <optp/node.h>
 
-#include <unordered_set>
-
 namespace optp
 {
 	class connector;

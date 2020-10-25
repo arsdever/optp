@@ -12,8 +12,6 @@
 
 #include "object.h"
 
-#include <nlohmann/json.hpp>
-
 namespace optp
 {
 	class operation_result

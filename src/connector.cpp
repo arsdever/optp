@@ -70,7 +70,7 @@ namespace optp
 		}
 
 		logger->info("Remote peer connected successfully");
-		node_def_shptr def = std::make_shared<node_def>("127.0.0.1");
+		node_def_shptr def = std::make_shared<node_def>(peer.remote_endpoint().address().to_string());
 		rnode_shptr rnode = std::make_shared<remote_node>(std::move(peer), std::move(def));
 		rnode->set_protocol(m_protocol);
 		rnode->set_event_handlers(m_eventHandlerMapping);

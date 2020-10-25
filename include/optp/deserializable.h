@@ -10,7 +10,6 @@
 #pragma once
 
 #include <optp/typedefs.h>
-#include <istream>
 
 namespace optp
 {

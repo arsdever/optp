@@ -28,6 +28,8 @@ namespace optp
 		void setAddress(std::string const& address) override;
 		std::ostream& serialize(std::ostream& stm) const override;
 		std::istream& deserialize(std::istream& stm) override;
+		interfaces::node_group group() const override;
+		void set_group(interfaces::node_group) override;
 
 		int metatype() const override { return (int)object_metatypes::object_metatype::NODE_DEF; }
 
@@ -36,5 +38,6 @@ namespace optp
 	private:
 		
 		std::string m_address;
+		interfaces::node_group m_nodeGroup;
 	};
 }
